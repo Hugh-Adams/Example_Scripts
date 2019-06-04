@@ -29,7 +29,7 @@
 # Audits Containers Configlets and Devices for CVP 2018.2.x
 #
 #    Version 0.2 22/03/2019
-# 
+#
 #    Written by:
 #       Hugh Adams, Arista Networks
 #
@@ -37,10 +37,74 @@
 #       0.1 - 22/01/2019 - initial script
 #       0.2 - 22/03/2019 - added Device Audit and reworked getting device to use provisioning tree
 #
-# Requires a user with read access to "Provisioning" in CVP
-#
 # Requires CVP user credentials
 #
+DOCUMENTATION = """
+---
+Script: CVPauditReport.py
+version_added: "0.2"
+supported CVP version: 2018.2.x
+author: "Hugh Adams EMEA AS Team(ha@arista.com)"
+short_description: Audit CVP Containers, Configlets, and Devices.
+description:
+  - CloudVison Portal Configlets, Containers, and Devices provide the means to
+    build configurations for Arista devices managed by CVP.
+  - The Audit Report provides concise CSV outputs that audit the structure of the
+    configuration generated, along with associated Software Images applied and
+    final device configurations. These reports provide a simple way to audit CVP
+    instalations and compare multiple CVP instalations across different sites
+  - Three reports can be produced:
+      DeviceReport - CSV matrix of Devices and the configlets applied to them
+      ConfigletReport - CSV matrix of Configlets, Configlet Type (Static, Builder)
+                        Container Applied to, and devices affected by it
+      Configlet Diffs - Comparison of similar configlets across multiple CVP instances,
+                        used to check consistence of applied configuration. Report
+                        includes a camparison score (100 - identical, 0 - very different)
+                        and a separate diff file (html) highlighting the differences
+      The reports will be saved to the same directory location as the script
+options:
+  username:
+    description - CloudVision Portal user name to login with, if accessing multiple
+                  instances of CVP the username must be available in each instance
+    required - true
+    default - null
+  password:
+    description - Password for user specified in username if accessing multiple
+                  instances of CVP the password must be the same in each instance
+    required - true
+    default - null
+  target:
+    description - List of CVP appliances to create reports for, the primary node in
+                  each cluster should be provided. Each URL or IP address separated
+                  by a comma.
+    required - true
+    default - null
+  configlet:
+    description - List of name filters to use to match (include) configlets in
+                  the audit report. Assuming a standard naming convention this list
+                  can be used to filter out device specific configlets as these are
+                  likely to different for each device making any diff report with
+                  them in pointless.
+    required - true
+    default - null
+  option:
+    description - List of reports to create, each report option separated by a
+                  comma.
+    options - all - ouptut all avialable reports
+            - configlet - output configlet assingments 1 report per CVP appliance
+                          includes configlet associations and final device configurations
+            - configuration - output comparison of simalar configlets across CVP appliances
+            - devices - ouput of device inventory type data
+    required - true
+    default - null
+  diffRatio:
+    description - Comparison threshold used to decide if two configlets are similar
+                  enough to be the same. A ratio of 100 would mean that both configlets
+                  would have to be identical. A ratio of 90 generally gives a good
+                  comaprison result.
+    required - false
+    default - 90
+"""
 
 # Import Required Libraries
 import json
@@ -103,7 +167,7 @@ class serverCvp(object):
         except:
             raise serverCvpError("Error in session to CVP Server")
         self.cookies = response.cookies
-        return response.json()    
+        return response.json()
 
     def logOut(self):
         headers = { 'Content-Type':'application/json' }
@@ -132,13 +196,13 @@ class serverCvp(object):
         response = requests.get(self.url+getURL,cookies=self.cookies,params=getParams,verify=False)
         if "[404]" in response:
             text = "Error gerConfiglets failed: 404 error invalid URL"
-            raise serverCvpError(text)        
+            raise serverCvpError(text)
         elif "errorMessage" in str(response.json()):
             text = "Error gerConfiglets failed: %s" % response.json()['errorMessage']
             raise serverCvpError(text)
         else:
             return response.json()
-    
+
     def getConfigletDevices(self, name):
         """ Get a list of all devices associated with a named configlet
             name - name of configlet to look for."""
@@ -147,24 +211,11 @@ class serverCvp(object):
         response = requests.get(self.url+getURL,cookies=self.cookies,params=getParams,verify=False)
         if "[404]" in response:
             text = "Error getConfiglets failed: 404 error invalid URL"
-            raise serverCvpError(text) 
+            raise serverCvpError(text)
         elif "errorMessage" in str(response):
             text = "Error getConfigletDevices failed: %s" % response.json()['errorMessage']
             raise serverCvpError(text)
         return response.json()
-
-#    def getDevices(self):
-#        """ Get a list of all devices in the inventory"""
-#        getURL = "/cvpservice/inventory/getInventory.do?"
-#        getParams = {"startIndex":0,"endIndex":0,"sortByColumn":"containerName","sortOrder":"Asc"}
-#        response = requests.get(self.url+getURL,cookies=self.cookies,params=getParams,verify=False)
-#        if "[404]" in response:
-#            text = "Error getDevices failed: 404 error invalid URL"
-#            raise serverCvpError(text) 
-#        elif "errorMessage" in str(response):
-#            text = "Error getDevices failed: %s" % response.json()['errorMessage']
-#            raise serverCvpError(text)
-#        return response.json()
 
     def getDevices(self):
         # Get All devices in the Inventory
@@ -194,7 +245,7 @@ class serverCvp(object):
         response = requests.get(self.url+getURL,cookies=self.cookies,params=getParams,verify=False)
         if "[404]" in response:
             text = "Error gerConfiglets failed: 404 error invalid URL"
-            raise serverCvpError(text) 
+            raise serverCvpError(text)
         elif "errorMessage" in str(response):
             text = "Error getConfigletContainers failed: %s" % response.json()['errorMessage']
             raise serverCvpError(text)
@@ -236,7 +287,7 @@ def fileOpen(filePath,fileType):
         else:
             with open(filePath, 'r') as FH:
                 if fileType.lower() == "json":
-                    fileObject = json.load(FH)  
+                    fileObject = json.load(FH)
                 elif fileType.lower() == "txt":
                     fileObject = FH.readlines()
                 elif fileType.lower() == "csv":
@@ -317,11 +368,11 @@ def fileWrite(filePath,data,fileType,option="c"):
 def parseArgs(auditOptions):
     """Gathers comand line options for the script, generates help text and performs some error checking"""
     # Configure the option parser for CLI options to the script
-    usage = "usage: %prog [options] userName password configlet xlfile"
-    parser = argparse.ArgumentParser(description="Excel File to JSON Configlet Builder")
+    usage = "usage: %prog [options] username password target configlet option diffRatio"
+    parser = argparse.ArgumentParser(description="CVP Audit Report Tool")
     parser.add_argument("--username", help='Username to log into CVP')
     parser.add_argument("--password", help='Password for CVP user to login')
-    parser.add_argument("--target", help='List of CVP appliances to get snapshot from URL,URL')
+    parser.add_argument("--target", help='List of CVP appliances to get reports for URL,URL')
     parser.add_argument("--configlet", help='List of configlet name filters for comaprison Audit')
     parser.add_argument("--option", help='Audit Options are %s'%auditOptions)
     parser.add_argument("--diffRatio", help="Configlet Name Comparision Ratio")
@@ -340,12 +391,12 @@ def checkArgs( args,auditOptions ):
     getCvpAccess = False
     destList = []
 
-    # React to the options provided  
+    # React to the options provided
 
     # CVP Username for script to use
     if args.username == None:
         getCvpAccess = True
-        
+
     # CVP Password for script to use
     if args.password == None:
         getCvpAccess = True
@@ -356,7 +407,7 @@ def checkArgs( args,auditOptions ):
     if getCvpAccess:
         args.username = raw_input("User Name to Access CVP: ")
         args.password = askPass( args.username, "CVP" )
-             
+
     # CVP appliances to Audit
     if not args.target:
         applianceNumber = int(raw_input("Number of CVP Appliance to use: "))
@@ -486,7 +537,7 @@ def main():
                 containerString = "\r".join(str(item) for item in sorted(configletList[configlet]["containers"]) )
                 deviceString = "\r".join(str(item) for item in sorted(configletList[configlet]["devices"]))
                 configletReport.append({"configletName":str(configlet),"configletType":configletList[configlet]["type"],"containersApplied":containerString,
-                                        "devicesApplied":deviceString})          
+                                        "devicesApplied":deviceString})
             #fullPath = os.path.abspath(os.path.dirname(sys.argv[0]))
             filePath = "%s/%s-ConfigletReport.csv" %(fullPath,cvpServer)
             saveReport = fileWrite(filePath,configletReport,"csvDict","w")
@@ -556,7 +607,7 @@ def main():
             # Compare config in CVP server 1 with their counterparts in the otherCVP servers
             configReport = [["hostname_1","configletName_1","diffScore","hostname_2","configletName_2","diff_File"]]
             for count,cvpObject in enumerate(cvpObjects[1:]): # Miss out first instance as that is the comparision object
-                print "%s Checking %s" %(str(count+1),cvpObject["hostName"]) 
+                print "%s Checking %s" %(str(count+1),cvpObject["hostName"])
                 for refConfiglet in cvpObjects[0]["configlets"]:
                     for compConfiglet in cvpObject["configlets"]:
                         if fuzz.ratio(compConfiglet["name"],refConfiglet["name"]) > options.diffRatio:
