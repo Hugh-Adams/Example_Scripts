@@ -34,3 +34,7 @@ This script allows the user to change and encrypt passwords inside a Configlet.
 **Reconcile Configlet Name change**
 
 The script allows the user to change the name of the reconcile Configlets after they have been provisioned without resetting the reconcile flag in the Configlet metadata.
+
+**DataConfigletBuilder**
+
+This script creates a CVP Configlet and stores JSON (Java Script Object Notation) formatted data in it. The data is generated from the contents of the Excel Spreadsheet Demo_Data.
