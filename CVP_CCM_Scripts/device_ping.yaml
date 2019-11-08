@@ -6,5 +6,5 @@ args:
   failCount: 3
   pingCount: 5
   timeout: 1
-  username: labadmin
-  password: r0undabout!
+  username: username
+  password: password
