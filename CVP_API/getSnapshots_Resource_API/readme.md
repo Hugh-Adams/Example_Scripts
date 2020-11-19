@@ -1,7 +1,9 @@
-#Script Overview and Setup#
+# Retrive CVP Snapshots with the Resource API
 
 These scripts will retrieve the CVP Snapshots and have been created in Python version 3.8.1.
-#get_snapshots.py#
+
+## get_snapshots.py
+
 The "get_snapshots.py" script can be used to retrieve the Snapshots contained in CVP and display them on the CLI. The script can be easily modified to store these outputs in other formats for further processing.
 
 The script takes two arguments:
@@ -16,7 +18,7 @@ For this solution the "token" authentication scheme will be used. This scheme re
 
 The script will return a formatted output of the Snapshot data found.
 
-#get_token.py#
+## get_token.py
 
 The access token and certificate used in the "get_snapshots.py" script can be obtained by executing the **"get_token.py"** script. This script gets a session token and optional SSL cert from CVP and saves then in the local directory as token.txt and cvp.crt
 
@@ -26,7 +28,7 @@ The "get_token.py" script takes three required arguments plus one optional:
       **password {{PASSWORD}}** Password to authorize with associated to the username
       **ssl** Save the self-signed certificate to cvp.crt in the local directory.
 
-#Script setup#
+## Script setup
 
 The scripts can be installed from the zip file located at {{GitHub Repository}}
 
@@ -59,7 +61,7 @@ chmod 755 ./get_token.py
 
 The scripts should now be ready to use.
 
-#Script execution#
+## Script execution
 
 The scripts can now be used to get the CVP snapshots:
 
