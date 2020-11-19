@@ -30,7 +30,7 @@ The "get_token.py" script takes three required arguments plus one optional:
 
 ## Script setup
 
-The scripts can be installed from the zip file located at {{GitHub Repository}}
+The scripts can be installed from the zip file [get_snapshots.zip](https://github.com/Hugh-Adams/Example_Scripts/blob/master/CVP_API/getSnapshots_Resource_API/get_snapshots.zip)
 
 Unzip the file Get-Snapshot.zip to a local directory then change directory to it.
 
