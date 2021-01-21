@@ -58,12 +58,15 @@
 #  These files are assumed to be in the same location as this file unless
 #  the above options are amended
 #
+#  utils.py (pretty_print import) can be found in cloudvision-python repo
+#  https://github.com/aristanetworks/cloudvision-python/blob/trunk/examples/Connector/utils.py
+#
 
 # Import Required Libraries
 import json
 import requests
 import ssl
-import os, sys, csv, xlrd
+import os, sys, csv
 #from cloudvision.Connector.codec import Wildcard
 from cloudvision.Connector.grpc_client import GRPCClient, create_query
 from cloudvision.Connector.codec.custom_types import FrozenDict
