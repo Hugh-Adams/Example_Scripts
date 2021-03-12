@@ -1,0 +1,12 @@
+name : device_ping
+args:
+  hostType: eos
+  deviceList: 192.168.30.109,192.168.30.110,192.168.30.111,192.168.30.112
+  targetList: 192.168.30.109,192.168.30.110,192.168.30.111,192.168.30.112
+  vrf: MGMNT
+  passmark: 100
+  failCount: 3
+  pingCount: 5
+  timeout: 1
+  username: username
+  password: password

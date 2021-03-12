@@ -1,0 +1,5 @@
+requests
+cloudvision
+fuzzywuzzy
+python-Levenshtein
+xlrd
