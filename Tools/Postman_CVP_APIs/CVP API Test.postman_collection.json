@@ -1,0 +1,997 @@
+{
+	"info": {
+		"_postman_id": "aefa4c8e-1e1c-4445-b183-100f77cc4bb1",
+		"name": "CVP API Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"item": [
+				{
+					"name": "Log  Current User Out",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"userId\":\"arista\",\n\t\"password\":\"arista\"\n}"
+						},
+						"url": {
+							"raw": "https://{{serverIP}}/cvpservice/login/logout.do",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"login",
+								"logout.do"
+							]
+						},
+						"description": "Log Current user session out of CVP"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "https://{{serverIP}}/cvpservice/user/getUser.do?userId={{username}}",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"user",
+								"getUser.do"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "{{username}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Good Login",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {},
+						"followRedirects": true,
+						"followOriginalHttpMethod": false
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"userId\":\"{{username}}\",\n\t\"password\":\"{{password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://{{serverIP}}/cvpservice/login/authenticate.do?Content-Type=application/json",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"login",
+								"authenticate.do"
+							],
+							"query": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							]
+						},
+						"description": "Good Login to CVP Server"
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Configlets",
+			"item": [
+				{
+					"name": "Get List of Configlet Builder",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/cvpservice/configlet/getConfiglets.do?startIndex=0&endIndex=0&type=Builder",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"configlet",
+								"getConfiglets.do"
+							],
+							"query": [
+								{
+									"key": "startIndex",
+									"value": "0"
+								},
+								{
+									"key": "endIndex",
+									"value": "0"
+								},
+								{
+									"key": "type",
+									"value": "Builder"
+								}
+							]
+						},
+						"description": "List all Configlet Builders in CVP"
+					},
+					"response": []
+				},
+				{
+					"name": "Get List of Configlets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/cvpservice/configlet/getConfiglets.do?startIndex=0&endIndex=0&type=configlet&objectId&objectType",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"configlet",
+								"getConfiglets.do"
+							],
+							"query": [
+								{
+									"key": "startIndex",
+									"value": "0"
+								},
+								{
+									"key": "endIndex",
+									"value": "0"
+								},
+								{
+									"key": "type",
+									"value": "configlet"
+								},
+								{
+									"key": "objectId",
+									"value": null
+								},
+								{
+									"key": "objectType",
+									"value": null
+								}
+							]
+						},
+						"description": "List all Configlet in CVP"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Configlet by Name",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/cvpservice/configlet/getConfigletByName.do?name=CTL1-PRD-SLEAF-001_ep",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"configlet",
+								"getConfigletByName.do"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "CTL1-PRD-SLEAF-001_ep"
+								}
+							]
+						},
+						"description": "Use Configlet Name to select configlet\nDisplay information about configlet"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Configlet ",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"config\": \"! ***Loop back change test***\\ninterface Loopback123\\n   description this is a test loopback\\n   ip address 123.1.1.1/32\\n   no shutdown\",\n  \"key\": \"configlet_941abe97-e3eb-488d-aa5f-04d957996d7b\",\n  \"name\": \"ACB_Loopback_test\",\n  \"reconciled\": false,\n  \"waitForTaskIds\": false\n}"
+						},
+						"url": {
+							"raw": "https://{{serverIP}}/cvpservice/configlet/updateConfiglet.do",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"configlet",
+								"updateConfiglet.do"
+							]
+						},
+						"description": "Use Configlet Name and key to select configlet\nchange the configuration\nuses data in body of request"
+					},
+					"response": []
+				},
+				{
+					"name": "Get History of Configlets",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/cvpservice/configlet/getConfigletHistory.do?startIndex=0&endIndex=15&configletId=configlet_75_2035435357947&queryparam",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"configlet",
+								"getConfigletHistory.do"
+							],
+							"query": [
+								{
+									"key": "startIndex",
+									"value": "0"
+								},
+								{
+									"key": "endIndex",
+									"value": "15"
+								},
+								{
+									"key": "configletId",
+									"value": "configlet_75_2035435357947"
+								},
+								{
+									"key": "queryparam",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Configlet Manipulation",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			]
+		},
+		{
+			"name": "Provisioning",
+			"item": [
+				{
+					"name": "MoveElement",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"data\": [\n    {\n      \"action\": \"update\",\n      \"nodeType\": \"netelement\",\n      \"nodeId\": \"08:00:27:68:38:5d\",\n      \"toId\": \"container_28_2587625446683\",\n      \"fromId\": \"undefined_container\",\n      \"toIdType\": \"container\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "https://{{serverIP}}/cvpservice/provisioning/addTempAction.do?nodeId=undefined_container&format=list",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"provisioning",
+								"addTempAction.do"
+							],
+							"query": [
+								{
+									"key": "nodeId",
+									"value": "undefined_container"
+								},
+								{
+									"key": "format",
+									"value": "list"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Net Elements",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/cvpservice/ztp/getAllNetElementList.do?nodeId=root&queryParam=&nodeName=&startIndex=0&endIndex=0&contextQueryParam&ignoreAdd=false",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"ztp",
+								"getAllNetElementList.do"
+							],
+							"query": [
+								{
+									"key": "nodeId",
+									"value": "root"
+								},
+								{
+									"key": "queryParam",
+									"value": ""
+								},
+								{
+									"key": "nodeName",
+									"value": ""
+								},
+								{
+									"key": "startIndex",
+									"value": "0"
+								},
+								{
+									"key": "endIndex",
+									"value": "0"
+								},
+								{
+									"key": "contextQueryParam",
+									"value": null
+								},
+								{
+									"key": "ignoreAdd",
+									"value": "false"
+								}
+							]
+						},
+						"description": "Get Devices in Container and sub containers"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Net Element Info by Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/cvpservice/ztp/getNetElementInfoById.do?netElementId=",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"ztp",
+								"getNetElementInfoById.do"
+							],
+							"query": [
+								{
+									"key": "netElementId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Get Devices info"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Net Element Info by Id copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/cvpservice/ztp/getNetElementInfoById.do?netElementId=",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"ztp",
+								"getNetElementInfoById.do"
+							],
+							"query": [
+								{
+									"key": "netElementId",
+									"value": ""
+								}
+							]
+						},
+						"description": "Get Devices info"
+					},
+					"response": []
+				},
+				{
+					"name": "get NetElement Image By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://cvpserver/cvpservice/provisioning/getNetElementImageById.do?netElementId=00%3A50%3A56%3Ace%3A26%3A06",
+							"protocol": "https",
+							"host": [
+								"cvpserver"
+							],
+							"path": [
+								"cvpservice",
+								"provisioning",
+								"getNetElementImageById.do"
+							],
+							"query": [
+								{
+									"key": "netElementId",
+									"value": "00%3A50%3A56%3Ace%3A26%3A06"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Inventory",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/cvpservice/inventory/devices?provisioned=True",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"inventory",
+								"devices"
+							],
+							"query": [
+								{
+									"key": "provisioned",
+									"value": "True"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Tasks",
+			"item": [
+				{
+					"name": "Get Created Task",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{serverIP}}/cvpservice/task/getTasks.do?startIndex=0&endIndex=0&queryparam=Pending",
+							"protocol": "http",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"task",
+								"getTasks.do"
+							],
+							"query": [
+								{
+									"key": "startIndex",
+									"value": "0"
+								},
+								{
+									"key": "endIndex",
+									"value": "0"
+								},
+								{
+									"key": "queryparam",
+									"value": "Pending"
+								}
+							]
+						},
+						"description": "Query CVP for Tasks with a status of pending\nuse queryparam to do this"
+					},
+					"response": []
+				},
+				{
+					"name": "Add a log entry to the task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"taskId\": \"154\",\n  \"message\": \"This is a test Change\",\n  \"source\": \"CVP REST API\"\n}"
+						},
+						"url": {
+							"raw": "http://{{serverIP}}/cvpservice/workflow/addWorkOrderLog.do",
+							"protocol": "http",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"workflow",
+								"addWorkOrderLog.do"
+							]
+						},
+						"description": "using taskId edit the log for the task"
+					},
+					"response": []
+				},
+				{
+					"name": "Add a Note to the task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"workOrderId\": \"153\",\n  \"note\": \"This task is being automated\"\n}"
+						},
+						"url": {
+							"raw": "http://{{serverIP}}/cvpservice/task/addNoteToTask.do",
+							"protocol": "http",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"task",
+								"addNoteToTask.do"
+							]
+						},
+						"description": "using taskId edit the Notes field for the task"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task Logs",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{serverIP}}/cvpservice/task/getLogsById.do?id=153&startIndex=0&endIndex=0",
+							"protocol": "http",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"task",
+								"getLogsById.do"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "153"
+								},
+								{
+									"key": "startIndex",
+									"value": "0"
+								},
+								{
+									"key": "endIndex",
+									"value": "0"
+								}
+							]
+						},
+						"description": "using taskId get the logs for the task"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task Information",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{serverIP}}/cvpservice/task/getTaskById.do?taskId=153",
+							"protocol": "http",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"task",
+								"getTaskById.do"
+							],
+							"query": [
+								{
+									"key": "taskId",
+									"value": "153"
+								}
+							]
+						},
+						"description": "using taskId get the information about the task"
+					},
+					"response": []
+				},
+				{
+					"name": "Execute Task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"data\": [\n    \"154\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://{{serverIP}}/cvpservice/task/executeTask.do",
+							"protocol": "http",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"task",
+								"executeTask.do"
+							]
+						},
+						"description": "using taskId to Execute the task"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"data\": [\n    \"153\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "http://{{serverIP}}/cvpservice/task/cancelTask.do",
+							"protocol": "http",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"cvpservice",
+								"task",
+								"cancelTask.do"
+							]
+						},
+						"description": "using taskId to cancel the task"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Telemetry",
+			"item": [
+				{
+					"name": "Get Telemetry Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/api/v1/rest/analytics/tags/labels/devices/topology_type/value/leaf/elements?pretty",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"rest",
+								"analytics",
+								"tags",
+								"labels",
+								"devices",
+								"topology_type",
+								"value",
+								"leaf",
+								"elements"
+							],
+							"query": [
+								{
+									"key": "pretty",
+									"value": null
+								}
+							]
+						},
+						"description": "Query CVP for Telemetry for Turbine statux"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Telemetry Data v2",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/aeris/v1/rest/?dataset=devices&from=1523029959700",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"aeris",
+								"v1",
+								"rest",
+								""
+							],
+							"query": [
+								{
+									"key": "dataset",
+									"value": "devices"
+								},
+								{
+									"key": "from",
+									"value": "1523029959700"
+								}
+							]
+						},
+						"description": "Query CVP for Telemetry for Turbine statux"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Telemetry Data Turbine Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/aeris/v1/rest/",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"aeris",
+								"v1",
+								"rest",
+								""
+							]
+						},
+						"description": "Query CVP for Telemetry for Turbine statux"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Telemetry Data Turbine Status copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/aeris/v1/rest/",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"aeris",
+								"v1",
+								"rest",
+								""
+							]
+						},
+						"description": "Query CVP for Telemetry for Turbine statux"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Telemetry Data Running Config",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/aeris/v1/rest/CTL1-OOB-MLEAF-001/Config/running/lines/",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"aeris",
+								"v1",
+								"rest",
+								"CTL1-OOB-MLEAF-001",
+								"Config",
+								"running",
+								"lines",
+								""
+							]
+						},
+						"description": "Query CVP Telemetry Running config"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Connectivity Monitor Data ",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://{{serverIP}}/api/v1/rest//Devices/D69D32A5ADFB6D3C23AEFD6E35074634/versioned-data/connectivityMonitor/status/hostStatus/CTL1-PRD-SLEAF-001/defaultStats",
+							"protocol": "https",
+							"host": [
+								"{{serverIP}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"rest",
+								"",
+								"Devices",
+								"D69D32A5ADFB6D3C23AEFD6E35074634",
+								"versioned-data",
+								"connectivityMonitor",
+								"status",
+								"hostStatus",
+								"CTL1-PRD-SLEAF-001",
+								"defaultStats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Snapshot",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "arista",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "arista",
+				"type": "string"
+			},
+			{
+				"key": "saveHelperData",
+				"value": false,
+				"type": "boolean"
+			},
+			{
+				"key": "showPassword",
+				"value": false,
+				"type": "boolean"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "username",
+			"value": "arista"
+		},
+		{
+			"key": "password",
+			"value": "arista"
+		},
+		{
+			"key": "serverIP",
+			"value": "0.0.0.0"
+		}
+	]
+}
