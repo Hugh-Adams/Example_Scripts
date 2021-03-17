@@ -69,18 +69,18 @@ class serverCvp(object):
         try:
             requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
         except packages.urllib3.exceptions.ProtocolError as e:
-            if str(e) == "('Connection aborted.', gaierror(8, 'nodename nor servname provided, or not known'))":
+            if str(e) == "('Connection aborted.', gaierror(8, 'nodename nor servername provided, or not known'))":
                 raise serverCvpError(
                     "DNS Error: The CVP Server %s can not be found" % HOST)
-            elif str(e) == "('Connection aborted.', error(54, 'Connection reset by peer'))":
+            elif str(e) == "('Connection aborted.', error(54, 'Connection reset by %s'))" % HOST:
                 raise serverCvpError("Error, connection aborted")
             else:
-                raise serverCvpError("Could not connect to Server")
+                raise serverCvpError("Could not connect to Server %s" % HOST)
 
     def logOn(self):
         try:
             headers = {'Content-Type': 'application/json'}
-            loginURL = "/web/login/authenticate.do"
+            loginURL = "/cvpservice/login/authenticate.do"
             self.response = requests.post(
                 self.url+loginURL, json=self.authenticateData, headers=headers, verify=False)
             if "errorMessage" in str(self.response.json()):
