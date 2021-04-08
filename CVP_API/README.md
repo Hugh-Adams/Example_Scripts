@@ -34,3 +34,7 @@ This script creates a CVP Configlet and stores JSON (Java Script Object Notation
 **Snapshot Utils**
 
 These scripts provide methods for the user to retrieve CloudVision Snapshots and save them to a local file space.
+
+**CloudVision 202X Configlet Sync**
+
+Synchronize Configlets between two CVP servers.
