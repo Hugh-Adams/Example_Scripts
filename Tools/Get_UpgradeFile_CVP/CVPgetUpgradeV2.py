@@ -83,10 +83,15 @@ def main (args):
     # Step 1 - get a session code
     warnings.filterwarnings("ignore")
     creds = (base64.b64encode(args.token.encode())).decode("utf-8")
+    session = requests.Session()
+    # Set up proxy server if required
+    if args.proxyAddr is not None:
+        proxies = { str(args.proxyType):str(args.proxyAddr)}
+        session.proxies.update(proxies)
 
     session_code_url = "https://www.arista.com/custom_data/api/cvp/getSessionCode/"
     jsonpost = {'accessToken': creds}
-    result = requests.post(session_code_url, data=json.dumps(jsonpost))
+    result = session.post(session_code_url, data=json.dumps(jsonpost))
     if result.json()["status"]["message"] == 'Access token expired':
         print("The API token has expired. Please visit arista.com, click on your profile and select Regenerate Token then re-run the script with the new token.")
         sys.exit()
@@ -102,7 +107,7 @@ def main (args):
     # Step 2 - use the path and session code to get the actual direct download link URL
     download_link_url = "https://www.arista.com/custom_data/api/cvp/getDownloadLink/"
     jsonpost = {'sessionCode': session_code, 'filePath': url}
-    result = requests.post(download_link_url, data=json.dumps(jsonpost))
+    result = session.post(download_link_url, data=json.dumps(jsonpost))
     download_link = (result.json()["data"]["url"])
     if args.test:
         print ("Server Response: %s\nResponse Data: %s}" %(result,result.json()))
@@ -110,7 +115,7 @@ def main (args):
     if not args.nofile:
         # Download the file
         chunkSize = 1024
-        r = requests.get(download_link, stream=True)
+        r = session.get(download_link, stream=True)
         with open(saveFile, 'wb') as fh:
             for chunk in r.iter_content(chunk_size=chunkSize): 
                 if chunk: # filter out keep-alive new chunks
@@ -123,6 +128,8 @@ if __name__ == "__main__":
     parser.add_argument('--upgrade', required=True,
                         help="CloudVision Upgrade File Name i.e. cvp-upgrade-2020.2.3.tgz")
     parser.add_argument('--token', required=True, help="User API access token found at https://www.arista.com/en/users/profile")
+    parser.add_argument('--proxyType', required=False, help="Type of proxy http or https")
+    parser.add_argument('--proxyAddr', required=False, help="IP address or URL of proxy server", default=None)
     parser.add_argument('--test', required=False, action='store_true')
     parser.add_argument('--nofile', required=False, action='store_true')
     args = parser.parse_args()
