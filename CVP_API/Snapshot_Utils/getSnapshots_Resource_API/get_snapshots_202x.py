@@ -215,13 +215,21 @@ def query_ssResults(client, device_id, ss_id):
     result = {}
     for results in unfreeze(get(client, dataset, snapshotElts)):
         if debug:
+            print (f"Snap shot Results Data type {type(results)}")
             print(f"ssResults-results: {results}\n\n")
         if ss_id in results:
             for commandLine in results[ss_id]['Output']:
                 result[commandLine['Command']] = {}
                 result[commandLine['Command']]['error'] = commandLine['Error']
-                result[commandLine['Command']]['output'] = results[str(
-                    commandLine['Result'])+"_0"]
+                result[commandLine['Command']]['output'] = ""
+                foundElement = True
+                elementNum = 0
+                while foundElement:
+                    result[commandLine['Command']]['output'] += results[str(commandLine['Result'])+"_"+str(elementNum)]
+                    elementNum += 1
+                    if str(commandLine['Result'])+"_"+str(elementNum) not in results:
+                        foundElement = False
+                
     return result
 
 def unfreeze(o):
