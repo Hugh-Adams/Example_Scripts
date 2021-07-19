@@ -8,7 +8,7 @@
 from cryptography.fernet import Fernet
 import argparse
 import iniparse
-import sys, os
+import os
 
 def decryptPwd (encryptdPwd, keyfile):
     # Decrypt Password using key value in file

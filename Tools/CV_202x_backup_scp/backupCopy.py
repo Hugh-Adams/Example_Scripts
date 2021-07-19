@@ -17,6 +17,16 @@ from pprint import pprint
 import sys
 import datetime
 
+def log(message,maxSize=1000):
+    destDir = str(os.path.abspath(os.path.dirname(sys.argv[0])))
+    logFile = destDir+"/backupCopy.log"
+    if os.path.exists(logFile) and os.path.getsize(logFile) < maxSize:
+        with open(logFile, 'a') as fp:
+                fp.writelines(message)
+    else:
+        with open(logFile, 'w') as fp:
+                fp.writelines(message)
+
 def backupLists():
     ''' Get the current backup lists'''
     backupList = glob.glob("/data/cvpbackup/*")
@@ -44,7 +54,7 @@ def getBackupFiles():
                 [backupLogList[-1], fileFromPath(backupLogList[-1])]]
     return fileList
 
-def createBackup( limit ):
+def createBackup( limit):
    '''Create one-shot backup of CVP.
    Arguments:
       limit  -- The threshold value after which the oldest backup will be
@@ -60,6 +70,7 @@ def createBackup( limit ):
       pprint(backupImageList)
       print ('Starting Backup Log List:')
       pprint(backupLogList)
+      log("Strarting Backup Lists:\n%s\n%s\n%s\n"%(backupDataList, backupImageList, backupLogList))
 
       # Determine the starting oldest key
       now = datetime.datetime.now()
@@ -70,54 +81,64 @@ def createBackup( limit ):
 
       # Limit the number of pre-existing data backups
       if limit and lenBackupDataList >= limit:
-         print ( 'Found %d backup files more than the configured limit'
-                 % ( lenBackupDataList - limit + 1 ) )
-         # Reduce no. of backups stored to limit-1
-         for i in range( 0, lenBackupDataList - limit + 1 ):
-            print ( '   %d: Deleting old backup data file: %s'
-                    % ( i, backupDataList[ 0 ] ) )
+        print( 'Found %d backup files more than the configured limit\n'
+                 % ( lenBackupDataList - limit + 1 ))
+        log( 'Found %d backup files more than the configured limit\n'
+                % ( lenBackupDataList - limit + 1 ))
+        # Reduce no. of backups stored to limit-1
+        for i in range( 0, lenBackupDataList - limit + 1 ):
+            print( '   %d: Deleting old backup data file: %s\n'
+                % ( i, backupDataList[ 0 ] ))
+            log( '   %d: Deleting old backup data file: %s\n'
+                % ( i, backupDataList[ 0 ] ))
             os.remove(backupDataList[ 0 ])
             oldestDataKey = filter(str.isdigit, backupDataList[ 0 ])
             backupDataList.pop(0)
 
       # Leave only one image backup as old as the oldest remaining data backup
       if len(backupDataList) > 0:
-         oldestDataKey = filter(str.isdigit, backupDataList[ 0 ])
-      savedOne = False
+        oldestDataKey = filter(str.isdigit, backupDataList[ 0 ])
+        savedOne = False
       for imgfile in reversed(backupImageList):
-         imageKey = filter(str.isdigit, imgfile)
-         if imageKey <= oldestDataKey and savedOne == False:
+        imageKey = filter(str.isdigit, imgfile)
+        if imageKey <= oldestDataKey and savedOne == False:
             savedOne = True
-         elif imageKey <= oldestDataKey:
-            print ('   Deleting old backup image file:', imgfile)
+        elif imageKey <= oldestDataKey:
+            print('   Deleting old backup image file: %s\n'%imgfile)
+            log('   Deleting old backup image file: %s\n'%imgfile)
             os.remove(imgfile)
             backupImageList.remove(imgfile)
 
       # Remove backup logfiles older than oldest remaining data backup
       for logfile in reversed(backupLogList):
-         logKey = filter(str.isdigit, logfile)
-         if logKey < oldestDataKey:
-            print ('   Deleting old backup log file:', logfile)
+        logKey = filter(str.isdigit, logfile)
+        if logKey < oldestDataKey:
+            print('   Deleting old backup log file: %s\n' %logfile)
+            log('   Deleting old backup log file: %s\n' %logfile)
             os.remove(logfile)
             backupLogList.remove(logfile)
 
-      print ('Ending Backup Data List:')
+      print('Ending Backup Data List:')
       pprint(backupDataList)
       print ('Ending Backup Image List:')
       pprint(backupImageList)
       print ('Ending Backup Log List:')
       pprint(backupLogList)
+      log("End Backup Lists:\n%s\n%s\n%s\n"%(backupDataList, backupImageList, backupLogList))
 
       # Create backup
-      print ('Creating a new backup. This may take some time...')
+      print('Creating a new backup. This may take some time...\n')
+      log('Creating a new backup. This may take some time...\n')
       ret = call('su - cvp -c "cvpi backup cvp"', shell=True)
-      print ('Backup created')
+      print('Backup created\n')
+      log('Backup created\n')
    except OSError as e:
-      print ('Error Creating backup:', e)
-      ret = True
+       print('Error Creating backup: %s\n'%e)
+       log('Error Creating backup: %s\n'%e)
+       ret = True
    return ret
 
-def scpFile( srcFile, destFile, server, user, password ):
+def scpFile( srcFile, destFile, server, user, password):
     '''SCP Files created during backup to remote server.
     Arguments:
         srcFile   --  full file path to the local file to be copied
@@ -138,7 +159,8 @@ def scpFile( srcFile, destFile, server, user, password ):
     response = pexpect.spawn(cmd)
     options = response.expect([pexpect.TIMEOUT, SSH_NEWKEY, SSH_PSSWD])
     if options == 0: # Command Timed Out
-        print ('SCP ERROR - SSH Timedout:\n   %s\n   %s' %(response.before, response.after))
+        print('SCP ERROR - SSH Timedout:\n   %s\n   %s\n' %(response.before, response.after))
+        log('SCP ERROR - SSH Timedout:\n   %s\n   %s\n' %(response.before, response.after))
         return False
     elif options == 1:  # SSH does not have the public key. Just accept it.
         response.sendline('yes')
@@ -147,17 +169,29 @@ def scpFile( srcFile, destFile, server, user, password ):
     elif options == 2: # SSH requires a password
         response.sendline(password)
     else: # One of the expect options was not matched
-        print ('SCP ERROR - SSH could not login:\n   %s\n   %s' %(response.before, response.after))
+        print('SCP ERROR - SSH could not login:\n   %s\n   %s\n' %(response.before, response.after))
+        log('SCP ERROR - SSH could not login:\n   %s\n   %s\n' %(response.before, response.after))
         return False
-    options = response.expect(['Permission denied', '100%'])
+    options = response.expect(['Permission denied', '100%', 'Failed to open', 'No such'])
     if options == 0: # Remote Host has denied the file copy or login
-        print ('SCP ERROR - Username/Password or File Permissions Wrong:\n   %s\n   %s' %(response.before, response.after))
+        print('SCP ERROR - Username/Password or File Permissions Wrong:\n   %s\n   %s\n' %(response.before, response.after))
+        log('SCP ERROR - Username/Password or File Permissions Wrong:\n   %s\n   %s\n' %(response.before, response.after))
         return False
     elif options == 1: # File was successfully copied to remote host
-        print ('Copied: %s' %response.after)
+        print('Copied: %s\n' %response.after)
+        log('Copied: %s\n' %response.after)
         return True
+    elif options == 2: # File permissions problem
+        print('SCP ERROR - User does not have write permission to file or directory:\%s\n' %destFile)
+        log('SCP ERROR - User does not have write permission to file or directory:\%s\n' %destFile)
+        return False
+    elif options == 3: # File access problem
+        print('SCP ERROR - Directory does not exist:\%s\n' %destFile)
+        log('SCP ERROR - Directory does not exist:\%s\n' %destFile)
+        return False
     else:
-        print ('SCP ERROR:\n   %s\n   %s' % (response.before, response.after)) # Something else went wrong
+        print('SCP ERROR:\n   %s\n   %s\n' % (response.before, response.after)) # Something else went wrong
+        log('SCP ERROR:\n   %s\n   %s\n' % (response.before, response.after)) # Something else went wrong
         return False
 
 def parseArgs():
@@ -187,13 +221,15 @@ def main():
     # Set max number of backups to keep
     if iniFile.has_section("Backup_Settings"):
         limit = int(iniFile.get("Backup_Settings","limit"))
-        print ('Backup Limit set to: %s from INI file' %limit)
+        log('Backup Limit set to: %s from INI file\n' %limit)
     else:
         limit = options.limit
-        print ('Backup Limit set to: %s from Args/default' %limit)
+        log('Backup Limit set to: %s from Args/default\n' %limit)
 
     # Make a note of time of day just before back starts
     nowKey = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    print("Backup Started: %s\n"%nowKey)
+    log("Backup Started: %s\n"%nowKey)
 
     ret = createBackup( limit )
     # Get list of files created during backup
@@ -205,11 +241,16 @@ def main():
     for path,entry in fileList:
         if filter(str.isdigit, entry) >= nowKey:
             dest = destination+entry
-            print ("Copying %s to %s %s" %(entry, server, dest))
-            scpFile(path, dest, server, user, password)
-            scpdFiles.append(entry)
-    print ('Backup Files copied')
+            print("Copying %s to %s %s\n" %(entry, server, dest))
+            log("Copying %s to %s %s\n" %(entry, server, dest))
+            if scpFile(path, dest, server, user, password):
+                scpdFiles.append(entry)
+    print('Backup Files copied')
     pprint(scpdFiles)
+    log("Backup Files copied:\n %s\n"%scpdFiles)
+    nowKey = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    print("Backup Finished: %s\n"%nowKey)
+    log("Backup Finished: %s\n"%nowKey)
     return int( ret )
 
 if __name__ == '__main__':
