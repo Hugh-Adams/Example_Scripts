@@ -99,7 +99,7 @@ def fileOpen(filePath, fileType):
                 elif fileType.lower() == "j2":
                     fileObject = Template(FH.read())
                 else:
-                    print "Invalid fileType"
+                    print (f"Invalid fileType: {fileType}")
                     fileObject = False
         return fileObject
     else:
