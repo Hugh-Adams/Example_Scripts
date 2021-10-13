@@ -61,7 +61,7 @@ import argparse
 
 #from examples.Connector.utils import fileWrite
 
-debug = False
+debug = True
 
 
 def get_client(apiserverAddr, token=None, certs=None, key=None, ca=None):
@@ -216,14 +216,17 @@ if __name__ == "__main__":
         dataset = "analytics"
         # Iterate through the custom events from the source CVP server
         # and publish the data and the pointer to that data
-        for events in source_config:
-            if "custom" in source_config[events].keys():
-                pathElts = source_config[events]["custom"]["path_elements"]
-                custom_data = source_config[events]["custom"]["updates"]
-                publish(CVclient, dataset, pathElts, custom_data)
-                # path pointers need to be created with a different encoding
-                # they are optional to have, but
-                ptr_data = {"custom": Path(keys=["Turbines", "config", events, "custom"])}
-                publish(CVclient, dataset, pathElts[:-1], ptr_data)
+        if source_config:
+            for events in source_config:
+                if "custom" in source_config[events].keys():
+                    pathElts = source_config[events]["custom"]["path_elements"]
+                    custom_data = source_config[events]["custom"]["updates"]
+                    publish(CVclient, dataset, pathElts, custom_data)
+                    # path pointers need to be created with a different encoding
+                    # they are optional to have, but
+                    ptr_data = {"custom": Path(keys=["Turbines", "config", events, "custom"])}
+                    publish(CVclient, dataset, pathElts[:-1], ptr_data)
+        else:
+            print(f'The source file for the "set" option {filepath}backupSourceCVP.json was not found, no changes made')
     else:
         print(f"Invalid Action: {args.mode} please choose --mode get or --mode set")

@@ -105,3 +105,5 @@ venv.bak/
 
 #VS Code
 .code-workspace
+CVP_API/Copy_Custom_Events/token.txt
+CVP_API/Copy_Custom_Events/cvp.crt
