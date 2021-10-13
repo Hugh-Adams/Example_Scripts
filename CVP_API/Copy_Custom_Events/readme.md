@@ -1,9 +1,9 @@
-#Copy CloudVision Custom Syslog Events#
+#Copy CloudVision Custom Syslog Events
 
 The Custom Syslog Event records are stored in the Aeris database to improve scaling and performance. 
 To Access data in the Aeris database the resource APIs that use the Google RPC framework are required.
 
-##copy_custom_events.py##
+##copy_custom_events.py
 
 The copy_custom_events.py script works for CVP 2020.x.x through to CVP 2022.x.x releases and requires CVP tokens to access the CVP servers. 
 The tokens can be retrieved using the "get_token.py" script. 
@@ -15,7 +15,7 @@ The copy_custom_events script takes three arguments:
                                Mode get retrieves Custom Syslog Events from the Target CV cluster.
                                In both modes a backup file is created (get - backupSourceCVP.json, set - backupDestCVP.json)
 
-##get_token.py##
+##get_token.py
 
 The access token and certificate used in the "get_snapshots.py" script can be obtained by executing the **"get_token.py"** script. This script gets a session token and optional SSL cert from CVP and saves then in the local directory as token.txt and cvp.crt
 
@@ -25,7 +25,7 @@ The "get_token.py" script takes three required arguments plus one optional:
       **password {{PASSWORD}}** Password to authorize with associated to the username
       **ssl** Save the self-signed certificate to cvp.crt in the local directory.
 
-##Copying Custom Syslog Events##
+##Copying Custom Syslog Events
 
 To copy a set of Custom Syslog Events from one CV cluster to another first retrieve the token files from the Source CV cluster and then 'get' the Custom Syslog Events:
 
@@ -41,7 +41,7 @@ Then retrieve the token files from the Destination CV cluster and then apply, 's
 ./copy_custom_events_cfg.py --mode set --cvhost 192.168.20.20:8443 --cvauth=token,token.txt,cvp.crt
 ```
 
-##Requirement##
+##Requirement
 
 All the required python libraries not supplied in this repo can be install using:
 
