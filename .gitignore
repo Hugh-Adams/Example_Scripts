@@ -107,3 +107,6 @@ venv.bak/
 .code-workspace
 CVP_API/Copy_Custom_Events/token.txt
 CVP_API/Copy_Custom_Events/cvp.crt
+CVP_API/Copy_Custom_Events/backupDestCVP.json
+CVP_API/Copy_Custom_Events/CV_Resource_APIs.code-workspace
+CVP_API/Copy_Custom_Events/backupSourceCVP.json

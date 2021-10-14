@@ -596,8 +596,8 @@
                                 "InterfaceTags": [],
                                 "InterfaceTagsQuery": null,
                                 "IsTagsQuery": false,
-                                "Severity": "WARNING",
-                                "Suppress": false
+                                "Severity": "",
+                                "Suppress": true
                             },
                             "SyslogEventRule": null,
                             "ThresholdValue": null
@@ -978,6 +978,85 @@
             }
         }
     },
+    "event-device-detected": {
+        "default": {
+            "path_elements": [
+                "Turbines",
+                "config",
+                "event-device-detected",
+                "default"
+            ],
+            "updates": {
+                "Beta": {
+                    "Description": "event beta bool",
+                    "Range": "",
+                    "Type": "bool",
+                    "Value": false
+                },
+                "DefaultRules": {
+                    "Description": "default rules",
+                    "Range": "",
+                    "Type": "[]*events.EventRule",
+                    "Value": [
+                        {
+                            "Rule": {
+                                "DeviceTags": [],
+                                "DeviceTagsQuery": null,
+                                "Duration": {
+                                    "Clear": 0,
+                                    "Raise": 0
+                                },
+                                "GenerateEvent": false,
+                                "InterfaceTags": [],
+                                "InterfaceTagsQuery": null,
+                                "IsTagsQuery": false,
+                                "Severity": "INFO",
+                                "Suppress": false
+                            },
+                            "SyslogEventRule": null,
+                            "ThresholdValue": null
+                        }
+                    ]
+                },
+                "Description": {
+                    "Description": "event description",
+                    "Range": "",
+                    "Type": "string",
+                    "Value": "New device $deviceId was detected with Zerotouch $ztpStatus"
+                },
+                "DisableUI": {
+                    "Description": "disable config UI",
+                    "Range": "",
+                    "Type": "bool",
+                    "Value": true
+                },
+                "EnableInterfaceTags": {
+                    "Description": "enable interface tags",
+                    "Range": "",
+                    "Type": "bool",
+                    "Value": false
+                },
+                "EventType": {
+                    "Description": "event type",
+                    "Range": "",
+                    "Type": "string",
+                    "Value": "SYS_DEVICE_DETECTED"
+                },
+                "Title": {
+                    "Description": "event title",
+                    "Range": "",
+                    "Type": "string",
+                    "Value": "New Device Detected"
+                },
+                "UIClass": {
+                    "Description": "UI class",
+                    "Range": "",
+                    "Type": "string",
+                    "Value": "NonThreshold"
+                }
+            }
+        }
+    },
     "event-device-inactive": {
         "default": {
             "path_elements": [
@@ -1101,7 +1180,7 @@
                     "Description": "event description",
                     "Range": "",
                     "Type": "string",
-                    "Value": "DOM temperature on QSFP transceiver exceeded threshold"
+                    "Value": "Value for QSFP temperature $value outside of bound $threshold"
                 },
                 "DisableUI": {
                     "Description": "disable config UI",
@@ -1210,7 +1289,7 @@
                     "Description": "event description",
                     "Range": "",
                     "Type": "string",
-                    "Value": "DOM voltage on QSFP transceiver exceeded threshold"
+                    "Value": "Value for QSFP voltage $value outside of bound $threshold"
                 },
                 "DisableUI": {
                     "Description": "disable config UI",
@@ -1319,7 +1398,7 @@
                     "Description": "event description",
                     "Range": "",
                     "Type": "string",
-                    "Value": "DOM temperature on SFP transceiver exceeded threshold"
+                    "Value": "Value for SFP temperature $value outside of bound $threshold"
                 },
                 "DisableUI": {
                     "Description": "disable config UI",
@@ -1428,7 +1507,7 @@
                     "Description": "event description",
                     "Range": "",
                     "Type": "string",
-                    "Value": "DOM voltage on SFP transceiver exceeded threshold"
+                    "Value": "Value for SFP voltage $value outside of bound $threshold"
                 },
                 "DisableUI": {
                     "Description": "disable config UI",
@@ -2226,168 +2305,6 @@
         }
     },
     "event-syslog-v2": {
-        "custom": {
-            "path_elements": [
-                "Turbines",
-                "config",
-                "event-syslog-v2",
-                "custom"
-            ],
-            "updates": {
-                "Rules": [
-                    {
-                        "Rule": {
-                            "DeviceTags": [],
-                            "Duration": {
-                                "Clear": 0,
-                                "Raise": 0
-                            },
-                            "GenerateEvent": true,
-                            "InterfaceTags": [],
-                            "Severity": "INFO",
-                            "Suppress": false
-                        },
-                        "SyslogEventRule": {
-                            "EndLogMessage": "",
-                            "EventDescription": "Active GM has change valid clock source.  Holdover mode should be transitory.   - $text",
-                            "EventTitle": "PTP Grandmaster Changed: VALID GM or Holdover mode entered",
-                            "Facility": "^PTP$",
-                            "LogMessage": ".{4}Grandmaster (000000\\w{10}|ec4670\\w{10}).{5}Grandmaster (000000\\w{10}|ec4670\\w{10})",
-                            "Mnemonic": "^GRANDMASTER_CHANGE$",
-                            "MutePeriod": 600000000000,
-                            "ParameterPattern": {},
-                            "SetEventSeverityFromSyslog": false,
-                            "SyslogSeverity": []
-                        }
-                    },
-                    {
-                        "Rule": {
-                            "DeviceTags": [],
-                            "Duration": {
-                                "Clear": 0,
-                                "Raise": 0
-                            },
-                            "GenerateEvent": true,
-                            "InterfaceTags": [],
-                            "Severity": "CRITICAL",
-                            "Suppress": false
-                        },
-                        "SyslogEventRule": {
-                            "EndLogMessage": "",
-                            "EventDescription": "Active GM is not a valid clock source please check network connectivity and any recent configuration changes - $text",
-                            "EventTitle": "PTP Grandmaster Changed: INVALID GM",
-                            "Facility": "^PTP$",
-                            "LogMessage": "(New Grandmaster (?!000000\\w{10}|ec4670\\w{10}))",
-                            "Mnemonic": "^GRANDMASTER_CHANGE$",
-                            "MutePeriod": 600000000000,
-                            "ParameterPattern": {},
-                            "SetEventSeverityFromSyslog": false,
-                            "SyslogSeverity": []
-                        }
-                    },
-                    {
-                        "Rule": {
-                            "DeviceTags": [],
-                            "Duration": {
-                                "Clear": 0,
-                                "Raise": 0
-                            },
-                            "GenerateEvent": true,
-                            "InterfaceTags": [],
-                            "Severity": "WARNING",
-                            "Suppress": false
-                        },
-                        "SyslogEventRule": {
-                            "EndLogMessage": "",
-                            "EventDescription": "Active GM is now a valid clock source - $text",
-                            "EventTitle": "PTP Grandmaster Changed: VALID GM",
-                            "Facility": "^PTP$",
-                            "LogMessage": "(New Grandmaster (ec4670\\w{10}))",
-                            "Mnemonic": "^GRANDMASTER_CHANGE$",
-                            "MutePeriod": 600000000000,
-                            "ParameterPattern": {},
-                            "SetEventSeverityFromSyslog": false,
-                            "SyslogSeverity": []
-                        }
-                    },
-                    {
-                        "Rule": {
-                            "DeviceTags": [],
-                            "Duration": {
-                                "Clear": 0,
-                                "Raise": 0
-                            },
-                            "GenerateEvent": true,
-                            "InterfaceTags": [],
-                            "Severity": "WARNING",
-                            "Suppress": true
-                        },
-                        "SyslogEventRule": {
-                            "EndLogMessage": "",
-                            "EventDescription": "Active GM is now a switch - this should flip back to a switch very soon - $text",
-                            "EventTitle": "PTP Grandmaster Changed: EOS GM",
-                            "Facility": "^PTP$",
-                            "LogMessage": "(New Grandmaster (000000\\w{10}))",
-                            "Mnemonic": "^GRANDMASTER_CHANGE$",
-                            "MutePeriod": 600000000000,
-                            "ParameterPattern": {},
-                            "SetEventSeverityFromSyslog": false,
-                            "SyslogSeverity": []
-                        }
-                    },
-                    {
-                        "Rule": {
-                            "DeviceTags": [],
-                            "Duration": {
-                                "Clear": 0,
-                                "Raise": 0
-                            },
-                            "GenerateEvent": true,
-                            "InterfaceTags": [],
-                            "Severity": "WARNING",
-                            "Suppress": false
-                        },
-                        "SyslogEventRule": {
-                            "EndLogMessage": "",
-                            "EventDescription": "$text",
-                            "EventTitle": "PTP Grandmaster Lost: Clock in Holdover Mode",
-                            "Facility": "^PTP$",
-                            "LogMessage": "",
-                            "Mnemonic": "^ENTER_HOLDOVER_MODE$",
-                            "MutePeriod": 600000000000,
-                            "ParameterPattern": {},
-                            "SetEventSeverityFromSyslog": false,
-                            "SyslogSeverity": []
-                        }
-                    },
-                    {
-                        "Rule": {
-                            "DeviceTags": [],
-                            "Duration": {
-                                "Clear": 0,
-                                "Raise": 0
-                            },
-                            "GenerateEvent": true,
-                            "InterfaceTags": [],
-                            "Severity": "INFO",
-                            "Suppress": false
-                        },
-                        "SyslogEventRule": {
-                            "EndLogMessage": "",
-                            "EventDescription": "$text",
-                            "EventTitle": "PTP Grandmaster Class: GM class Changed",
-                            "Facility": "^PTP$",
-                            "LogMessage": "",
-                            "Mnemonic": "^GRANDMASTER_CLASS_CHANGE$",
-                            "MutePeriod": 600000000000,
-                            "ParameterPattern": {},
-                            "SetEventSeverityFromSyslog": true,
-                            "SyslogSeverity": []
-                        }
-                    }
-                ]
-            }
-        },
         "default": {
             "path_elements": [
                 "Turbines",
@@ -2431,6 +2348,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^HW_RESOURCE_FULL$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": []
@@ -2461,6 +2380,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^UTILIZATION_NORMAL$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": []
@@ -2491,6 +2412,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^SYSTEMOVERHEATWARNING$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": []
@@ -2525,6 +2448,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^INTERRUPT_OCCURRED$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": []
@@ -2559,6 +2484,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^DDR_BIST_FAILED$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": []
@@ -2593,6 +2520,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^DRAM_RETUNE$",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": []
@@ -2627,6 +2556,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^FPGA_PROGRAMMER_ERROR$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": []
@@ -2661,6 +2592,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^FPGA_ERROR_SYSTEM$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": []
@@ -2691,6 +2624,8 @@
                                 "LogMessage": "routing information is no longer being lost",
                                 "Mnemonic": "",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": []
@@ -2721,6 +2656,8 @@
                                 "LogMessage": "ROUTING INFORMATION IS BEING LOST",
                                 "Mnemonic": "",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": []
@@ -2751,6 +2688,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^UTILIZATION_HIGH$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -2783,6 +2722,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^DROP_COUNTER$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -2815,6 +2756,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^RECOVERY_TIME_ELAPSED$",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -2847,6 +2790,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^TIMEOUT_EXPIRED$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -2879,6 +2824,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^PRIORITIES_THRESHOLD_EXCEEDED$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -2911,6 +2858,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^PRIORITIES_THRESHOLD_NORMAL$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -2943,6 +2892,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^FORCE_RECOVERY_TIME_ELAPSED$",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -2975,6 +2926,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^UNSUPPORTED$",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -3007,6 +2960,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^UNSUPPORTED_DROP_ACTION$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -3039,6 +2994,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^WATCHDOG_ACTION_PROGRAMMING_FAILED$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -3071,6 +3028,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^WATCHDOG_NOT_SUPPORTED_ON_PORT$",
                                 "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -3103,6 +3062,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^HOST_FLAPPING$",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -3135,6 +3096,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^CARD_REMOVED$",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -3167,6 +3130,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^CARD_POWERED_ON$",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -3199,6 +3164,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^POWERSUPPLY_REMOVED$",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -3231,6 +3198,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^POWERSUPPLY_INSERTED$",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -3263,6 +3232,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^INPUT_POWER_OK$",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -3295,6 +3266,8 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^INPUT_POWER_LOSS$",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": [
@@ -3320,13 +3293,15 @@
                             },
                             "SyslogEventRule": {
                                 "EndLogMessage": "",
-                                "EventDescription": "Error code recieved from neighbour due to invalid BGP message.",
+                                "EventDescription": "Error code received from neighbour due to invalid BGP message.",
                                 "EventKeySchema": [],
                                 "EventTitle": "Syslog event detected: BGP Notification",
                                 "Facility": "^BGP$",
                                 "LogMessage": "",
                                 "Mnemonic": "^NOTIFICATION$",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": true,
                                 "SyslogSeverity": []
@@ -3357,8 +3332,170 @@
                                 "LogMessage": "",
                                 "Mnemonic": "^ADJCHANGE$",
                                 "MutePeriod": 10000000000,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
                                 "ParameterPattern": {},
                                 "SetEventSeverityFromSyslog": true,
+                                "SyslogSeverity": []
+                            },
+                            "ThresholdValue": null
+                        },
+                        {
+                            "Rule": {
+                                "DeviceTags": [],
+                                "DeviceTagsQuery": null,
+                                "Duration": {
+                                    "Clear": 0,
+                                    "Raise": 0
+                                },
+                                "GenerateEvent": true,
+                                "InterfaceTags": [],
+                                "InterfaceTagsQuery": null,
+                                "IsTagsQuery": false,
+                                "Severity": "INFO",
+                                "Suppress": false
+                            },
+                            "SyslogEventRule": {
+                                "EndLogMessage": "",
+                                "EventDescription": "Storm Control discarded packets as the number of broadcast, multicast or unknown-unicast packets exceeded the threshold",
+                                "EventKeySchema": [],
+                                "EventTitle": "Syslog event detected: Storm Control discarded packets",
+                                "Facility": "^ETH$",
+                                "LogMessage": "",
+                                "Mnemonic": "^STORMCONTROL_DISCARDS$",
+                                "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
+                                "ParameterPattern": {},
+                                "SetEventSeverityFromSyslog": false,
+                                "SyslogSeverity": []
+                            },
+                            "ThresholdValue": null
+                        },
+                        {
+                            "Rule": {
+                                "DeviceTags": [],
+                                "DeviceTagsQuery": null,
+                                "Duration": {
+                                    "Clear": 0,
+                                    "Raise": 0
+                                },
+                                "GenerateEvent": true,
+                                "InterfaceTags": [],
+                                "InterfaceTagsQuery": null,
+                                "IsTagsQuery": false,
+                                "Severity": "WARNING",
+                                "Suppress": false
+                            },
+                            "SyslogEventRule": {
+                                "EndLogMessage": "",
+                                "EventDescription": "MAC address blacklisted",
+                                "EventKeySchema": [],
+                                "EventTitle": "Syslog event detected: MAC address blacklisted",
+                                "Facility": "^EVPN$",
+                                "LogMessage": "",
+                                "Mnemonic": "^BLACKLISTED_DUPLICATE_MAC$",
+                                "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
+                                "ParameterPattern": {},
+                                "SetEventSeverityFromSyslog": false,
+                                "SyslogSeverity": []
+                            },
+                            "ThresholdValue": null
+                        },
+                        {
+                            "Rule": {
+                                "DeviceTags": [],
+                                "DeviceTagsQuery": null,
+                                "Duration": {
+                                    "Clear": 0,
+                                    "Raise": 0
+                                },
+                                "GenerateEvent": true,
+                                "InterfaceTags": [],
+                                "InterfaceTagsQuery": null,
+                                "IsTagsQuery": false,
+                                "Severity": "WARNING",
+                                "Suppress": false
+                            },
+                            "SyslogEventRule": {
+                                "EndLogMessage": "",
+                                "EventDescription": "Storage device monitor detected an error",
+                                "EventKeySchema": [],
+                                "EventTitle": "Syslog event detected: Storage device monitor detected an error",
+                                "Facility": "^STORAGEDEVICE$",
+                                "LogMessage": "",
+                                "Mnemonic": "^MONITOR_ERROR$",
+                                "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
+                                "ParameterPattern": {},
+                                "SetEventSeverityFromSyslog": false,
+                                "SyslogSeverity": []
+                            },
+                            "ThresholdValue": null
+                        },
+                        {
+                            "Rule": {
+                                "DeviceTags": [],
+                                "DeviceTagsQuery": null,
+                                "Duration": {
+                                    "Clear": 0,
+                                    "Raise": 0
+                                },
+                                "GenerateEvent": true,
+                                "InterfaceTags": [],
+                                "InterfaceTagsQuery": null,
+                                "IsTagsQuery": false,
+                                "Severity": "ERROR",
+                                "Suppress": false
+                            },
+                            "SyslogEventRule": {
+                                "EndLogMessage": "",
+                                "EventDescription": "Storage device monitor detected an error on an IO device",
+                                "EventKeySchema": [],
+                                "EventTitle": "Syslog event detected: Storage device monitor detected an error on an IO device",
+                                "Facility": "^STORAGEDEVICE$",
+                                "LogMessage": "",
+                                "Mnemonic": "^IO_ERROR$",
+                                "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
+                                "ParameterPattern": {},
+                                "SetEventSeverityFromSyslog": false,
+                                "SyslogSeverity": []
+                            },
+                            "ThresholdValue": null
+                        },
+                        {
+                            "Rule": {
+                                "DeviceTags": [],
+                                "DeviceTagsQuery": null,
+                                "Duration": {
+                                    "Clear": 0,
+                                    "Raise": 0
+                                },
+                                "GenerateEvent": true,
+                                "InterfaceTags": [],
+                                "InterfaceTagsQuery": null,
+                                "IsTagsQuery": false,
+                                "Severity": "WARNING",
+                                "Suppress": false
+                            },
+                            "SyslogEventRule": {
+                                "EndLogMessage": "",
+                                "EventDescription": "Storage device monitor detected an IO error on an external USB device",
+                                "EventKeySchema": [],
+                                "EventTitle": "Syslog event detected: Storage device monitor detected an IO error on an external USB device",
+                                "Facility": "^STORAGEDEVICE$",
+                                "LogMessage": "",
+                                "Mnemonic": "^IO_ERROR_EXTERNALUSB$",
+                                "MutePeriod": 0,
+                                "OccurrenceThreshold": 0,
+                                "OccurrenceWindow": 0,
+                                "ParameterPattern": {},
+                                "SetEventSeverityFromSyslog": false,
                                 "SyslogSeverity": []
                             },
                             "ThresholdValue": null
@@ -3655,6 +3792,115 @@
             }
         }
     },
+    "event-threshold-conn-monitor-latency": {
+        "default": {
+            "path_elements": [
+                "Turbines",
+                "config",
+                "event-threshold-conn-monitor-latency",
+                "default"
+            ],
+            "updates": {
+                "Beta": {
+                    "Description": "event beta bool",
+                    "Range": "",
+                    "Type": "bool",
+                    "Value": false
+                },
+                "DefaultRules": {
+                    "Description": "default rules",
+                    "Range": "",
+                    "Type": "[]*events.EventRule",
+                    "Value": [
+                        {
+                            "Rule": {
+                                "DeviceTags": [],
+                                "DeviceTagsQuery": null,
+                                "Duration": {
+                                    "Clear": 0,
+                                    "Raise": 0
+                                },
+                                "GenerateEvent": false,
+                                "InterfaceTags": [],
+                                "InterfaceTagsQuery": null,
+                                "IsTagsQuery": false,
+                                "Severity": "",
+                                "Suppress": true
+                            },
+                            "SyslogEventRule": null,
+                            "ThresholdValue": null
+                        }
+                    ]
+                },
+                "Description": {
+                    "Description": "event description",
+                    "Range": "",
+                    "Type": "string",
+                    "Value": "Detected Latency of $value milliseconds for Connectivity Monitor probe"
+                },
+                "DisableUI": {
+                    "Description": "disable config UI",
+                    "Range": "",
+                    "Type": "bool",
+                    "Value": false
+                },
+                "DynamicUnits": {
+                    "Description": "dynamic threshold units",
+                    "Range": "",
+                    "Type": "string",
+                    "Value": ""
+                },
+                "EnableInterfaceTags": {
+                    "Description": "enable interface tags",
+                    "Range": "",
+                    "Type": "bool",
+                    "Value": true
+                },
+                "EventType": {
+                    "Description": "event type",
+                    "Range": "",
+                    "Type": "string",
+                    "Value": "HIGH_CONN_MONITOR_VRF_LATENCY"
+                },
+                "StaticUnits": {
+                    "Description": "static threshold units",
+                    "Range": "",
+                    "Type": "string",
+                    "Value": "milliseconds"
+                },
+                "SupportedOperations": {
+                    "Description": "supported operations",
+                    "Range": "",
+                    "Type": "[]string",
+                    "Value": []
+                },
+                "SupportedValues": {
+                    "Description": "supported values",
+                    "Range": "",
+                    "Type": "[]string",
+                    "Value": []
+                },
+                "SupportsDynamic": {
+                    "Description": "supports dynamic",
+                    "Range": "",
+                    "Type": "bool",
+                    "Value": false
+                },
+                "Title": {
+                    "Description": "event title",
+                    "Range": "",
+                    "Type": "string",
+                    "Value": "High latency detected for Connectivity Monitor Host"
+                },
+                "UIClass": {
+                    "Description": "UI class",
+                    "Range": "",
+                    "Type": "string",
+                    "Value": "Threshold"
+                }
+            }
+        }
+    },
     "event-threshold-conn-monitor-pkt-loss": {
         "default": {
             "path_elements": [
@@ -3829,28 +4075,6 @@
                             "ThresholdValue": {
                                 "Operation": ">",
                                 "Threshold": 90.0,
-                                "Type": "static"
-                            }
-                        },
-                        {
-                            "Rule": {
-                                "DeviceTags": [],
-                                "DeviceTagsQuery": null,
-                                "Duration": {
-                                    "Clear": 0,
-                                    "Raise": 300000000000
-                                },
-                                "GenerateEvent": false,
-                                "InterfaceTags": [],
-                                "InterfaceTagsQuery": null,
-                                "IsTagsQuery": false,
-                                "Severity": "WARNING",
-                                "Suppress": false
-                            },
-                            "SyslogEventRule": null,
-                            "ThresholdValue": {
-                                "Operation": ">",
-                                "Threshold": 80.0,
                                 "Type": "static"
                             }
                         }
@@ -4063,7 +4287,7 @@
                     "Description": "event description",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Detected Too Few Downlink Devices ($value)"
+                    "Value": "Detected too few downlink devices ($value) for user-configured constraint rules"
                 },
                 "DisableUI": {
                     "Description": "disable config UI",
@@ -4119,7 +4343,7 @@
                     "Description": "event title",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Insufficient Downlink Device Redundancy"
+                    "Value": "Downlink Device Constraint Violation"
                 },
                 "UIClass": {
                     "Description": "UI class",
@@ -4131,108 +4355,6 @@
         }
     },
     "event-threshold-intf-in-utilization": {
-        "custom": {
-            "path_elements": [
-                "Turbines",
-                "config",
-                "event-threshold-intf-in-utilization",
-                "custom"
-            ],
-            "updates": {
-                "Rules": [
-                    {
-                        "Rule": {
-                            "DeviceTags": [
-                                {
-                                    "Negate": false,
-                                    "Tag": "device",
-                                    "Value": "media-leaf-2-JPE20302208"
-                                },
-                                {
-                                    "Negate": false,
-                                    "Tag": "device",
-                                    "Value": "media-leaf-3-JPE20282733"
-                                },
-                                {
-                                    "Negate": false,
-                                    "Tag": "device",
-                                    "Value": "media-leaf-1-JPE20302333"
-                                },
-                                {
-                                    "Negate": false,
-                                    "Tag": "device",
-                                    "Value": "campus-leaf-4-JPE19363421"
-                                },
-                                {
-                                    "Negate": false,
-                                    "Tag": "device",
-                                    "Value": "media-spine-1-JPE20244151"
-                                },
-                                {
-                                    "Negate": false,
-                                    "Tag": "device",
-                                    "Value": "media-spine-2-JPE21090526"
-                                }
-                            ],
-                            "DeviceTagsQuery": {
-                                "OrTags": [
-                                    {
-                                        "Tag": {
-                                            "Label": "device",
-                                            "Value": "media-leaf-2-JPE20302208"
-                                        }
-                                    },
-                                    {
-                                        "Tag": {
-                                            "Label": "device",
-                                            "Value": "media-leaf-3-JPE20282733"
-                                        }
-                                    },
-                                    {
-                                        "Tag": {
-                                            "Label": "device",
-                                            "Value": "media-leaf-1-JPE20302333"
-                                        }
-                                    },
-                                    {
-                                        "Tag": {
-                                            "Label": "device",
-                                            "Value": "campus-leaf-4-JPE19363421"
-                                        }
-                                    },
-                                    {
-                                        "Tag": {
-                                            "Label": "device",
-                                            "Value": "media-spine-1-JPE20244151"
-                                        }
-                                    },
-                                    {
-                                        "Tag": {
-                                            "Label": "device",
-                                            "Value": "media-spine-2-JPE21090526"
-                                        }
-                                    }
-                                ]
-                            },
-                            "Duration": {
-                                "Clear": 0,
-                                "Raise": 0
-                            },
-                            "GenerateEvent": true,
-                            "InterfaceTags": [],
-                            "IsTagsQuery": true,
-                            "Severity": "ERROR",
-                            "Suppress": true
-                        },
-                        "ThresholdValue": {
-                            "Operation": ">",
-                            "Threshold": "4",
-                            "Type": "static"
-                        }
-                    }
-                ]
-            }
-        },
         "default": {
             "path_elements": [
                 "Turbines",
@@ -4419,7 +4541,7 @@
                     "Description": "event description",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Detected Too Few Interfaces ($value) in Peer Connections"
+                    "Value": "Detected too few interfaces ($value) in peer connections for user-configured constraint rules"
                 },
                 "DisableUI": {
                     "Description": "disable config UI",
@@ -4476,7 +4598,7 @@
                     "Description": "event title",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Insufficient Peer Interface Redundancy"
+                    "Value": "Peer Interface Constraint Violation"
                 },
                 "UIClass": {
                     "Description": "UI class",
@@ -4512,7 +4634,7 @@
                     "Description": "event description",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Detected Too Few Interfaces ($value) in Uplink Connections"
+                    "Value": "Detected too few interfaces ($value) in uplink connections for user-configured constraint rules"
                 },
                 "DisableUI": {
                     "Description": "disable config UI",
@@ -4569,7 +4691,7 @@
                     "Description": "event title",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Insufficient Uplink Interface Redundancy"
+                    "Value": "Uplink Interface Constraint Violation"
                 },
                 "UIClass": {
                     "Description": "UI class",
@@ -4605,7 +4727,7 @@
                     "Description": "event description",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Detected Low Interface MTU of $value bytes on interface"
+                    "Value": "Detected interface MTU of $value bytes does not match user configured constraint rules"
                 },
                 "DisableUI": {
                     "Description": "disable config UI",
@@ -4662,7 +4784,7 @@
                     "Description": "event title",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Low Interface MTU"
+                    "Value": "Interface MTU Constraint Violation"
                 },
                 "UIClass": {
                     "Description": "UI class",
@@ -4674,108 +4796,6 @@
         }
     },
     "event-threshold-intf-out-utilization": {
-        "custom": {
-            "path_elements": [
-                "Turbines",
-                "config",
-                "event-threshold-intf-out-utilization",
-                "custom"
-            ],
-            "updates": {
-                "Rules": [
-                    {
-                        "Rule": {
-                            "DeviceTags": [
-                                {
-                                    "Negate": false,
-                                    "Tag": "device",
-                                    "Value": "media-leaf-3-JPE20282733"
-                                },
-                                {
-                                    "Negate": false,
-                                    "Tag": "device",
-                                    "Value": "media-spine-2-JPE21090526"
-                                },
-                                {
-                                    "Negate": false,
-                                    "Tag": "device",
-                                    "Value": "media-spine-1-JPE20244151"
-                                },
-                                {
-                                    "Negate": false,
-                                    "Tag": "device",
-                                    "Value": "campus-leaf-4-JPE19363421"
-                                },
-                                {
-                                    "Negate": false,
-                                    "Tag": "device",
-                                    "Value": "media-leaf-1-JPE20302333"
-                                },
-                                {
-                                    "Negate": false,
-                                    "Tag": "device",
-                                    "Value": "media-leaf-2-JPE20302208"
-                                }
-                            ],
-                            "DeviceTagsQuery": {
-                                "OrTags": [
-                                    {
-                                        "Tag": {
-                                            "Label": "device",
-                                            "Value": "media-leaf-3-JPE20282733"
-                                        }
-                                    },
-                                    {
-                                        "Tag": {
-                                            "Label": "device",
-                                            "Value": "media-spine-2-JPE21090526"
-                                        }
-                                    },
-                                    {
-                                        "Tag": {
-                                            "Label": "device",
-                                            "Value": "media-spine-1-JPE20244151"
-                                        }
-                                    },
-                                    {
-                                        "Tag": {
-                                            "Label": "device",
-                                            "Value": "campus-leaf-4-JPE19363421"
-                                        }
-                                    },
-                                    {
-                                        "Tag": {
-                                            "Label": "device",
-                                            "Value": "media-leaf-1-JPE20302333"
-                                        }
-                                    },
-                                    {
-                                        "Tag": {
-                                            "Label": "device",
-                                            "Value": "media-leaf-2-JPE20302208"
-                                        }
-                                    }
-                                ]
-                            },
-                            "Duration": {
-                                "Clear": 0,
-                                "Raise": 0
-                            },
-                            "GenerateEvent": true,
-                            "InterfaceTags": [],
-                            "IsTagsQuery": true,
-                            "Severity": "ERROR",
-                            "Suppress": true
-                        },
-                        "ThresholdValue": {
-                            "Operation": ">",
-                            "Threshold": "4",
-                            "Type": "static"
-                        }
-                    }
-                ]
-            }
-        },
         "default": {
             "path_elements": [
                 "Turbines",
@@ -4962,7 +4982,7 @@
                     "Description": "event description",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Detected Too Few Peer Devices ($value)"
+                    "Value": "Detected too few peer devices ($value) for user-configured constraint rules"
                 },
                 "DisableUI": {
                     "Description": "disable config UI",
@@ -5018,7 +5038,7 @@
                     "Description": "event title",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Insufficient Peer Device Redundancy"
+                    "Value": "Peer Device Constraint Violation"
                 },
                 "UIClass": {
                     "Description": "UI class",
@@ -5054,7 +5074,7 @@
                     "Description": "event description",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Detected Incorrect Interface Speed ($value) on interface"
+                    "Value": "Detected interface speed ($value) does not match user configured constraint rules"
                 },
                 "DisableUI": {
                     "Description": "disable config UI",
@@ -5112,7 +5132,9 @@
                         "speed50Gbps",
                         "speed100Gbps",
                         "speed200Gbps",
-                        "speed400Gbps"
+                        "speed400Gbps",
+                        "speed600Gbps",
+                        "speed800Gbps"
                     ]
                 },
                 "SupportsDynamic": {
@@ -5125,7 +5147,7 @@
                     "Description": "event title",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Incorrect Interface Speed"
+                    "Value": "Interface Speed Constraint Violation"
                 },
                 "UIClass": {
                     "Description": "UI class",
@@ -5161,7 +5183,7 @@
                     "Description": "event description",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Detected Too Few Uplink Devices ($value)"
+                    "Value": "Detected too few uplink devices ($value) for user-configured constraint rules"
                 },
                 "DisableUI": {
                     "Description": "disable config UI",
@@ -5217,7 +5239,7 @@
                     "Description": "event title",
                     "Range": "",
                     "Type": "string",
-                    "Value": "Insufficient Uplink Device Redundancy"
+                    "Value": "Uplink Device Constraint Violation"
                 },
                 "UIClass": {
                     "Description": "UI class",

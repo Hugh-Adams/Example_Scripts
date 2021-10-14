@@ -61,7 +61,7 @@ import argparse
 
 #from examples.Connector.utils import fileWrite
 
-debug = True
+debug = False
 
 
 def get_client(apiserverAddr, token=None, certs=None, key=None, ca=None):
@@ -190,7 +190,7 @@ if __name__ == "__main__":
     filepath = str(os.path.abspath(os.path.dirname(sys.argv[0])))+'/'
     ds = ("Backup and/or Copy CVP Event Generation Configuration between CV clusters\n"
           "Usage:\n"
-          "\tpython3 sync_events_cfg.py --mode --cvhost=10.83.12.79:8443 --cvauth=token,token.txt,cvp.crt "
+          "\tpython3 sync_events_cfg.py --mode set --cvhost=10.83.12.79:8443 --cvauth=token,token.txt,cvp.crt "
           )
     base = argparse.ArgumentParser(description=ds,
                                    formatter_class=argparse.RawTextHelpFormatter)
