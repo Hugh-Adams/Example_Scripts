@@ -19,11 +19,11 @@ def main(args):
 
     r.json()['sessionId']
 
-    with open("token.txt", "w") as f:
+    with open(str(args.server)+"_token.txt", "w") as f:
         f.write(r.json()['sessionId'])
 
     if args.ssl:
-        with open("cvp.crt", "w") as f:
+        with open(str(args.server)+"_cvp.crt", "w") as f:
             f.write(ssl.get_server_certificate((args.server, 443)))
 
 
@@ -32,10 +32,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description=ds,
         formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument(
-        '--server',
-        required=True,
-        help="CloudVision server to connect to in <host> format.")
+    parser.add_argument('--server', required=True,
+                        help="CloudVision server to connect to in <host> format.")
     parser.add_argument("--username", required=True, type=str,
                         help="Username to authorize with")
     parser.add_argument("--password", required=True, type=str,

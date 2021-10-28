@@ -27,25 +27,30 @@
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # Make a copy of the Events Configured in CloudVision
-# Update the Custom Evenets in CloudVision
+# and Update the Custom Evenets in CloudVision
 #
-#    Version 0.1 12/10/2021
+#    Version 0.2 25/10/2021
 #
 #    Written by:
+#       Tamas Plugar, Arista Networks
 #       Hugh Adams, Arista Networks
 #
 #    Revision history:
-#       0.1 - 12/10/2021 - initial script
+#       0.1 -        - initial script
+#       0.2 - 25/10/2021 - Updated to allow separate actions for get, set, or syn
+#                           of custom events.
 #
 # Requires a user with read access to the CVP aeris database
 # 
 # Requires:
-#      --Action    get (read Events from CV) or set (Update Custom Events on CV)
-#      --cvhost    CV Server IP or URL :8443
-#      --cvauth    token,token1.txt,cvp1.crt
+#      --mode     get (read Events from CV), set (Update Custom Events on CV), sync (copy events between CV clusters)
+#      --src      CV Server IP or URL :8443
+#      --srcauth  token,token1.txt,cvp1.crt
+#      --dst      CV Server IP or URL :8443
+#      --dstauth  token,token1.txt,cvp1.crt
 #
 # Usage:
-# sync_events_cfg.py --src=10.83.12.79:8443 --srcauth=token,token1.txt,cvp1.crt
+# copy_custom_events.py --mode sync --src=10.83.12.79:8443 --srcauth=token,src_token.txt,src_cvp.crt --dst=10.83.12.79:8443 --dstauth=token,dst_token.txt,dst_cvp.crt
 # 
 
 import datetime
@@ -182,7 +187,7 @@ def publish(client, dataset, pathElts, data={}):
 
 def backupConfig(filepath,serverType, data):
     ''' Saves data in a json file'''
-    filename = "backup" + str(serverType) + ".json"
+    filename = "backup_" + str(serverType) + ".json"
     fullpath = filepath+filename
     fileWrite(fullpath, data, 'json','w')
 
@@ -190,43 +195,82 @@ if __name__ == "__main__":
     filepath = str(os.path.abspath(os.path.dirname(sys.argv[0])))+'/'
     ds = ("Backup and/or Copy CVP Event Generation Configuration between CV clusters\n"
           "Usage:\n"
-          "\tpython3 sync_events_cfg.py --mode set --cvhost=10.83.12.79:8443 --cvauth=token,token.txt,cvp.crt "
+          "\t copy_custom_events.py --mode get --src=10.83.12.79:8443 --srcauth=token,src_token.txt,src_cvp.crt\n"
+          "\t copy_custom_events.py --mode set --dst=10.83.12.79:8443 --dstauth=token,dst_token.txt,dst_cvp.crt\n"
+          "\t copy_custom_events.py --mode sync --src=10.83.12.79:8443 --srcauth=token,src_token.txt,src_cvp.crt --dst=10.83.12.79:8443 --dstauth=token,dst_token.txt,dst_cvp.crt\n"
           )
     base = argparse.ArgumentParser(description=ds,
                                    formatter_class=argparse.RawTextHelpFormatter)
     add_arguments(base)
     args = base.parse_args()
-    # Authenticate to the CVP server
-    CVclient = get_client(args.cvhost, certs=args.certFile, key=args.keyFile,
-                           token=args.tokenFile, ca=args.caFile)
-    
-    # Get the Events from CloudVision
-    event_config = getEventsCfg(CVclient)
-    if args.mode.lower() == 'get':
-        # backup the event configurations from CloudVision
-        # #    - backupSourceCVP.json
-        backupConfig(filepath, 'SourceCVP', event_config)
-    elif args.mode.lower() == 'set':
-        # backup the event configurations from CloudVision
-        # #    - backupDestCVP.json
-        backupConfig(filepath, 'DestCVP', event_config)
-        # Open Source Event File
-        source_config = fileOpen(filepath+'backupSourceCVP.json', 'json')
-        # Apply Custom Events to Target CVP
-        dataset = "analytics"
-        # Iterate through the custom events from the source CVP server
-        # and publish the data and the pointer to that data
-        if source_config:
-            for events in source_config:
-                if "custom" in source_config[events].keys():
-                    pathElts = source_config[events]["custom"]["path_elements"]
-                    custom_data = source_config[events]["custom"]["updates"]
-                    publish(CVclient, dataset, pathElts, custom_data)
-                    # path pointers need to be created with a different encoding
-                    # they are optional to have, but
-                    ptr_data = {"custom": Path(keys=["Turbines", "config", events, "custom"])}
-                    publish(CVclient, dataset, pathElts[:-1], ptr_data)
+
+    if args.mode.lower() in ['get','set','sync']:
+        # Only set "proceed" True if all required checks are passed
+        proceed = False
+        if args.mode.lower() in ['get','sync']:
+            if args.src != 'NotSet' and args.srcauth != 'NotSet':
+                # Check for a TCP port definition in src address 
+                if ':' in args.src:
+                    # Authenticate to the Source CVP server
+                    SRCclient = get_client(args.src, certs=args.certFile, key=args.keyFile,
+                                token=args.tokenFile, ca=args.caFile)
+                    # Get the Events from CloudVision
+                    src_config = getEventsCfg(SRCclient)
+                    # backup the event configurations from CloudVision
+                    # #    - backupSourceCVP.json
+                    backupConfig(filepath, 'Source_CVP', src_config)
+                    proceed = True
+                else:
+                    proceed = False
+                    print(f'\nThe "mode" option was either "get" or "sync" \nbut the src option is missing a port - {args.src}\n')
+            else:
+                proceed = False
+                print('\nThe "mode" option was either "get" or "sync"\nbut Source CV details (src/srcauth) are missing:\n')
+                print(f'src: {args.src}\nsrcauth: {args.srcauth}\n')
+
+        if args.mode.lower() in ['set','sync']:
+            if args.dst != 'NotSet' and args.dstauth != 'NotSet':
+                # Check for a TCP port definition in src address 
+                if ':' in args.dst:
+                    # Authenticate to the Destination CVP server
+                    DSTclient = get_client(args.dst, certs=args.certFileDst, key=args.keyFileDst,
+                                token=args.tokenFileDst, ca=args.caFileDst)
+                    # Get the Events from CloudVision
+                    dst_config = getEventsCfg(DSTclient)
+                    # backup the event configurations from CloudVision
+                    # #    - backupSourceCVP.json
+                    backupConfig(filepath, 'Destination_CVP', dst_config)
+                    proceed = True
+                else:
+                    proceed = False
+                    print(f'\nThe "mode" option was either "set" or "sync"\nbut the dst option is missing a port - {args.dst}\n')
+            else:
+                proceed = False
+                print('\nThe "mode" option was either "set" or "sync" \nbut Destination CV details (dst/dstauth) are missing:\n')
+                print(f'dst: {args.dst}\ndstauth: {args.dstauth}\n')
+
+        if args.mode.lower() in ['set','syn'] and proceed:
+            # "proceed" is True if all required checks were passed
+            source_config = fileOpen(filepath+'backup_Source_CVP.json', 'json')
+            # Apply Custom Events to Target CVP
+            dataset = "analytics"
+            # Iterate through the custom events from the source CVP server
+            # and publish the data and the pointer to that data
+            if source_config:
+                for events in source_config:
+                    if "custom" in source_config[events].keys():
+                        pathElts = source_config[events]["custom"]["path_elements"]
+                        custom_data = source_config[events]["custom"]["updates"]
+                        publish(DSTclient, dataset, pathElts, custom_data)
+                        # path pointers need to be created with a different encoding
+                        # they are optional to have, but
+                        ptr_data = {"custom": Path(keys=["Turbines", "config", events, "custom"])}
+                        publish(DSTclient, dataset, pathElts[:-1], ptr_data)
+            else:
+                print(f'The source file for the "set" option {filepath}backup_Source_CVP.json was not found, no changes made')
+        if proceed:
+            print(f'\ncopy_custom_events.py mode: {args.mode} - completed')
         else:
-            print(f'The source file for the "set" option {filepath}backupSourceCVP.json was not found, no changes made')
+            print(f'\n{ds}')
     else:
-        print(f"Invalid Action: {args.mode} please choose --mode get or --mode set")
+        print(f'Invalid Action: "{args.mode}" please choose --mode get, --mode set, or --mode sync')

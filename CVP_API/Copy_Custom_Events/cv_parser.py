@@ -90,10 +90,14 @@ class AuthActionDst(argparse.Action):
 
 def add_arguments(base):
 
-    base.add_argument('--cvhost', help='URL and port of src CVP apiserver to connect to'
-                      'in the format HOST:PORT i.e. (apiserver.examplecvp.com:8443)')
-    base.add_argument('--cvauth', action=AuthAction, default='', help=AUTH_HELP)
-    base.add_argument('--mode', default='get', help='set or get Events from Cloudvision')
-    #base.add_argument('--dst', help='URL and port of dest CVP apiserver to connect to'
-    #                  'in the format HOST:PORT i.e. (apiserver.examplecvp.com:11002)')
-    #base.add_argument('--dstauth', action=AuthActionDst, default='', help=AUTH_HELP)
+    base.add_argument('--src', help='URL and port of src CVP apiserver to connect to'
+                      'in the format HOST:PORT i.e. (apiserver.examplecvp.com:8443)',
+                      default='NotSet')
+    base.add_argument('--srcauth', action=AuthAction, help=AUTH_HELP,
+                      default='NotSet')
+    base.add_argument('--dst', help='URL and port of dest CVP apiserver to connect to'
+                      'in the format HOST:PORT i.e. (apiserver.examplecvp.com:11002)',
+                      default='NotSet')
+    base.add_argument('--dstauth', action=AuthActionDst, help=AUTH_HELP,
+                      default='NotSet')
+    base.add_argument('--mode', default='get', help='set, get, or sync Events from Cloudvision')
