@@ -8,12 +8,16 @@ To Access data in the Aeris database the resource APIs that use the Google RPC f
 The copy_custom_events.py script works for CVP 2020.x.x through to CVP 2022.x.x releases and requires CVP tokens to access the CVP servers. 
 The tokens can be retrieved using the "get_token.py" script. 
 The copy_custom_events script takes three arguments:
-        **cvhost {{CVP IP / URL :8443}}** The CloudVision server to connect to on TCP port 8443
-        **cvauth {{token, token_file_name, cert_file_name}}** Authentication scheme used to connect to CloudVision in this case use the token option
+        **src {{CVP IP / URL :8443}}** The source CloudVision server to connect to on TCP port 8443
+        **srcauth {{token, token_file_name, cert_file_name}}** Authentication scheme used to connect to CloudVision in this case use the token option
                                                               "token,{tokenFile}[,{caFile}]"
-        **mode {{set / get}}** Mode set will apply previously retrieved Custom Syslog Events to the target CV cluster
+        **dst {{CVP IP / URL :8443}}** The destination CloudVision server to connect to on TCP port 8443
+        **dstauth {{token, token_file_name, cert_file_name}}** Authentication scheme used to connect to CloudVision in this case use the token option
+                                                              "token,{tokenFile}[,{caFile}]"
+        **mode {{set / get / sync }}** Mode set will apply previously retrieved Custom Syslog Events to the target CV cluster
                                Mode get retrieves Custom Syslog Events from the Target CV cluster.
-                               In both modes a backup file is created (get - backupSourceCVP.json, set - backupDestCVP.json)
+                               Mode sync copies the Custom Syslog Events between CV clusters
+                               In all modes a backup file is created (get - backupSourceCVP.json, set - backupDestCVP.json)
 
 ##get_token.py
 
@@ -31,15 +35,23 @@ To copy a set of Custom Syslog Events from one CV cluster to another first retri
 
 ```
 ./get_token.py --server 10.90.227.147 --username cvpadmin --password password --ssl
-./copy_custom_events_cfg.py --mode get --cvhost 192.168.10.10:8443 --cvauth=token,token.txt,cvp.crt
+./copy_custom_events_cfg.py --mode get --src 192.168.10.10:8443 --srcauth=token,token.txt,cvp.crt
 ```
 
 Then retrieve the token files from the Destination CV cluster and then apply, 'set', the Custom Syslog Events:
 
 ```
 ./get_token.py --server 10.83.30.100 --username cvpadmin --password password --ssl
-./copy_custom_events_cfg.py --mode set --cvhost 192.168.20.20:8443 --cvauth=token,token.txt,cvp.crt
+./copy_custom_events_cfg.py --mode set --dest 192.168.20.20:8443 --destauth=token,token.txt,cvp.crt
 ```
+
+Or combine the two actions with 'sync' to copy the Custom Syslog Events between clusters, you will need to generate both sets of token files first:
+
+```
+./get_token.py --server 10.83.30.100 --username cvpadmin --password password --ssl
+./copy_custom_events_cfg.py --mode sync --src 192.168.10.10:8443 --srcauth=token,src_token.txt,src_cvp.crt --dest 192.168.20.20:8443 --destauth=token,dst_token.txt,dst_cvp.crt
+```
+
 
 ##Requirement
 
