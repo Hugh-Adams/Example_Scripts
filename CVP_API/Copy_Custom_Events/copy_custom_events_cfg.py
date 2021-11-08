@@ -27,21 +27,13 @@
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # Make a copy of the Events Configured in CloudVision
-# and Update the Custom Evenets in CloudVision
-#
-#    Version 0.2 25/10/2021
+# and Update the Custom Events in CloudVision
 #
 #    Written by:
 #       Tamas Plugar, Arista Networks
 #       Hugh Adams, Arista Networks
 #
-#    Revision history:
-#       0.1 -        - initial script
-#       0.2 - 25/10/2021 - Updated to allow separate actions for get, set, or syn
-#                           of custom events.
-#
 # Requires a user with read access to the CVP aeris database
-# 
 # Requires:
 #      --mode     get (read Events from CV), set (Update Custom Events on CV), sync (copy events between CV clusters)
 #      --src      CV Server IP or URL :8443
@@ -50,10 +42,9 @@
 #      --dstauth  token,token1.txt,cvp1.crt
 #
 # Usage:
-# copy_custom_events.py --mode sync --src=10.83.12.79:8443 --srcauth=token,src_token.txt,src_cvp.crt --dst=10.83.12.79:8443 --dstauth=token,dst_token.txt,dst_cvp.crt
-# 
+# copy_custom_events.py --mode sync --src=10.83.12.79:8443 --srcauth=token,src_token.txt,src_cvp.crt 
+#      --dst=10.83.12.79:8443 --dstauth=token,dst_token.txt,dst_cvp.crt
 
-import datetime
 import os, sys
 from google.protobuf.timestamp_pb2 import Timestamp
 from cloudvision.Connector.grpc_client import GRPCClient, create_query, create_notification
@@ -63,8 +54,6 @@ from utils import *
 from cv_parser import add_arguments
 import json
 import argparse
-
-#from examples.Connector.utils import fileWrite
 
 debug = False
 
@@ -133,7 +122,6 @@ def getEventsCfg(client):
     event_config = {}
 
     for event in event_names:
-
         # Initialize the event dictionary where the default and custom rules
         # along with the path elements for each type will be stored
         event_dict = {}
@@ -147,7 +135,6 @@ def getEventsCfg(client):
         query = [create_query([(pathElts, [])], dataset)]
         for batch in client.get(query):
             for notif in batch["notifications"]:
-
                 # Only build a dictionary for custom rules if the custom key exists
                 if "custom" in notif['path_elements']:
                     if "custom" in event_dict.keys():
@@ -174,13 +161,11 @@ def publish(client, dataset, pathElts, data={}):
     sync = True
     compare = None
     updates = []
-    
     for dataKey in data.keys():
         dataValue = data.get(dataKey)
         updates.append((dataKey, dataValue))
 
     notifs = [create_notification(ts, pathElts, updates=updates)]
-
     client.publish(dtype=dtype, dId=dataset, sync=sync, compare=compare, notifs=notifs)
     return 0
 
@@ -191,13 +176,15 @@ def backupConfig(filepath,serverType, data):
     fullpath = filepath+filename
     fileWrite(fullpath, data, 'json','w')
 
+
 if __name__ == "__main__":
     filepath = str(os.path.abspath(os.path.dirname(sys.argv[0])))+'/'
     ds = ("Backup and/or Copy CVP Event Generation Configuration between CV clusters\n"
           "Usage:\n"
           "\t copy_custom_events.py --mode get --src=10.83.12.79:8443 --srcauth=token,src_token.txt,src_cvp.crt\n"
           "\t copy_custom_events.py --mode set --dst=10.83.12.79:8443 --dstauth=token,dst_token.txt,dst_cvp.crt\n"
-          "\t copy_custom_events.py --mode sync --src=10.83.12.79:8443 --srcauth=token,src_token.txt,src_cvp.crt --dst=10.83.12.79:8443 --dstauth=token,dst_token.txt,dst_cvp.crt\n"
+          "\t copy_custom_events.py --mode sync --src=10.83.12.79:8443 --srcauth=token,src_token.txt,src_cvp.crt\n"
+          "\t      --dst=10.83.12.79:8443 --dstauth=token,dst_token.txt,dst_cvp.crt\n"
           )
     base = argparse.ArgumentParser(description=ds,
                                    formatter_class=argparse.RawTextHelpFormatter)
@@ -209,7 +196,7 @@ if __name__ == "__main__":
         proceed = False
         if args.mode.lower() in ['get','sync']:
             if args.src != 'NotSet' and args.srcauth != 'NotSet':
-                # Check for a TCP port definition in src address 
+                # Check for a TCP port definition in src address
                 if ':' in args.src:
                     # Authenticate to the Source CVP server
                     SRCclient = get_client(args.src, certs=args.certFile, key=args.keyFile,
@@ -230,7 +217,7 @@ if __name__ == "__main__":
 
         if args.mode.lower() in ['set','sync']:
             if args.dst != 'NotSet' and args.dstauth != 'NotSet':
-                # Check for a TCP port definition in src address 
+                # Check for a TCP port definition in src address
                 if ':' in args.dst:
                     # Authenticate to the Destination CVP server
                     DSTclient = get_client(args.dst, certs=args.certFileDst, key=args.keyFileDst,
@@ -238,7 +225,7 @@ if __name__ == "__main__":
                     # Get the Events from CloudVision
                     dst_config = getEventsCfg(DSTclient)
                     # backup the event configurations from CloudVision
-                    # #    - backupSourceCVP.json
+                    #   - backupSourceCVP.json
                     backupConfig(filepath, 'Destination_CVP', dst_config)
                     proceed = True
                 else:
