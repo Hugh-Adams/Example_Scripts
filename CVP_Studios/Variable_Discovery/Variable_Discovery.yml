@@ -1,0 +1,38 @@
+-
+    service: arista.studio.v1.StudioConfigService
+    method: Set
+    body:
+        value:
+            key:
+                studio_id: 5ef995a2-7568-49ab-9bad-36cf7c6b1399
+                workspace_id: ""
+            display_name: Variable_Discovery
+            description: 'Check Context Variables'
+            template:
+                type: TEMPLATE_TYPE_MAKO
+                body: "<%\n# Lets find out what we can about the current device\ncurrent_device = ctx.getDevice()\nworkspace_id = ctx.studio.workspaceId\nstudio_id = ctx.studio.studioId\nstudio_inputs = ctx.studio.inputs\ndevice_id = current_device.id\ndevice_mac = current_device.mac\ndevice_ip = current_device.ip\ndevice_hostName = current_device.hostName\ndevice_modelName = current_device.modelName\ndevice_interfaces = []\nfor interface in current_device.getInterfaces():\n    interfaceName = interface.name\n    peerDevice = interface._peerDevice\n    peerInterface = interface._peerInterface\n    if peerDevice is not None:\n        peerName = peerDevice.hostName\n    else:\n        peerName = \"Not_Connected\"\n    if peerInterface is not None:\n        peerInterface = peerInterface.name\n    else:\n        peerInterface = \"None\"\n    device_interfaces.append(str(interfaceName)+\"-\"+str(peerName)+\":\"+str(peerInterface))\n\ncontext_user = ctx.user.username\n\n%>\n## Display Variables found\n! WorkSpace User     - ${context_user}\n! Workspace ID       - ${workspace_id}\n! Studio ID          - ${studio_id}\n! Studio Inputs      - ${studio_inputs}\n!\n! current device     - ${current_device}\n! device id          - ${device_id}\n! device System MAC  - ${device_mac}\n! device IP address  - ${device_ip}\n! device Hostname    - ${device_hostName}\n! device Model       - ${device_modelName}\n! device Interfaces  - \n% for interface in device_interfaces:\n!                    ${interface}\n% endfor\n!\n"
+            input_schema:
+                fields:
+                    values:
+                        fc3d2eb1-f511-490b-94e0-33052150af26:
+                            id: fc3d2eb1-f511-490b-94e0-33052150af26
+                            name: debug
+                            label: Debug
+                            description: 'Debug Mode'
+                            required: false
+                            type: INPUT_FIELD_TYPE_BOOLEAN
+                            boolean_props:
+                                default_value: true
+                        root:
+                            id: root
+                            name: ""
+                            label: ""
+                            description: ""
+                            required: false
+                            type: INPUT_FIELD_TYPE_GROUP
+                            group_props:
+                                members:
+                                    values:
+                                        - fc3d2eb1-f511-490b-94e0-33052150af26
+                layout:
+                    value: '{}'

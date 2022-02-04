@@ -1,0 +1,130 @@
+-
+    service: arista.studio.v1.StudioConfigService
+    method: Set
+    body:
+        value:
+            key:
+                studio_id: 1febaa09-4310-4f49-9053-d3e3e1142215
+                workspace_id: ""
+            display_name: 'Simple Service Interface'
+            description: 'Create Service Interface'
+            template:
+                type: TEMPLATE_TYPE_MAKO
+                body: "<%\ndef make_unique(listIn):\n    uniqueList = []\n    for item in sorted(listIn):\n        if item in uniqueList:\n            continue\n        else:\n            uniqueList.append(item)\n    return uniqueList\n    \ninterfaces = {}\nApplyConfig = False\nmy_device = ctx.getDevice()\nfor intf in my_device.getInterfaces():\n    trunk=[]\n    intrfName = intf.name\n    intrfData = device.resolve().interface.resolve(intrfName, strict=True)\n    if not intrfData or not intrfData.get('services'):\n        continue\n    else:\n        services = intrfData.get('services')\n        for service in services:\n            for profile in intrfProfiles:\n                if service == profile['serviceName']:\n                    trunk.append(profile['vlan'])\n                    ApplyConfig = True\n        interfaces[intrfName] = make_unique(trunk) # create an oreder list of unique VLANS\n%>\n% if ApplyConfig:\n% for interface in sorted(interfaces.items()):\n    %if len(interface) > 0:\ninterface ${interface[0]}\n  switchport mode access\n  no switchport access vlan 666\n  spanning-tree portfast\n  switchport mode trunk\n  switchport trunk allowed vlan \\\n    % for vlan in interface[1]:\n${vlan}${'\\n' if loop.last else ','}\\\n    % endfor\n    no shutdown\nexit\n    % endif \n% endfor\n% endif"
+            input_schema:
+                fields:
+                    values:
+                        7437a66f-2ca3-4756-99cd-3d2473c770d3:
+                            id: 7437a66f-2ca3-4756-99cd-3d2473c770d3
+                            name: serviceName
+                            label: 'Service Name'
+                            description: ""
+                            required: false
+                            type: INPUT_FIELD_TYPE_STRING
+                            string_props:
+                                default_value: null
+                                static_options: null
+                                format: null
+                                length: null
+                                pattern: null
+                                dynamic_options:
+                                    values:
+                                        - '{"fieldId":"4e7cb3c9-a58c-4675-996a-8664cc0f91bf"}'
+                        e99393a5-0452-4f3c-a18c-a2de7d3c4a46:
+                            id: e99393a5-0452-4f3c-a18c-a2de7d3c4a46
+                            name: services
+                            label: AssociatedServices
+                            description: ""
+                            required: false
+                            type: INPUT_FIELD_TYPE_COLLECTION
+                            collection_props:
+                                base_field_id: 7437a66f-2ca3-4756-99cd-3d2473c770d3
+                                key: ""
+                        06e034f5-183b-4b69-9d14-e8b353c0675c:
+                            id: 06e034f5-183b-4b69-9d14-e8b353c0675c
+                            name: interface
+                            label: Interface
+                            description: ""
+                            required: false
+                            type: INPUT_FIELD_TYPE_RESOLVER
+                            resolver_props:
+                                base_field_id: e99393a5-0452-4f3c-a18c-a2de7d3c4a46
+                                display_mode: RESOLVER_FIELD_DISPLAY_MODE_ALL
+                                input_mode: RESOLVER_FIELD_INPUT_MODE_SINGLE_INTERFACE_TAG
+                                input_tag_label: ""
+                                tag_filter_query: null
+                        f298a75b-b9f1-468b-a7a1-ecb80544faa0:
+                            id: f298a75b-b9f1-468b-a7a1-ecb80544faa0
+                            name: device
+                            label: Device
+                            description: ""
+                            required: false
+                            type: INPUT_FIELD_TYPE_RESOLVER
+                            resolver_props:
+                                base_field_id: 06e034f5-183b-4b69-9d14-e8b353c0675c
+                                display_mode: RESOLVER_FIELD_DISPLAY_MODE_SPARSE
+                                input_mode: RESOLVER_FIELD_INPUT_MODE_MULTI_DEVICE_TAG
+                                input_tag_label: null
+                                tag_filter_query: null
+                        4e7cb3c9-a58c-4675-996a-8664cc0f91bf:
+                            id: 4e7cb3c9-a58c-4675-996a-8664cc0f91bf
+                            name: serviceName
+                            label: 'Service Name'
+                            description: ""
+                            required: false
+                            type: INPUT_FIELD_TYPE_STRING
+                            string_props:
+                                default_value: null
+                                static_options: null
+                                format: null
+                                length: null
+                                pattern: null
+                                dynamic_options: null
+                        bab3c985-6d80-4f85-8929-33bdec7f1036:
+                            id: bab3c985-6d80-4f85-8929-33bdec7f1036
+                            name: vlan
+                            label: VLAN
+                            description: ""
+                            required: false
+                            type: INPUT_FIELD_TYPE_INTEGER
+                            integer_props:
+                                default_value: null
+                                range: null
+                                static_options: null
+                                dynamic_options: null
+                        5f0a7259-bce9-4a7b-b4fc-c0fd62af417d:
+                            id: 5f0a7259-bce9-4a7b-b4fc-c0fd62af417d
+                            name: profile
+                            label: Profile
+                            description: ""
+                            required: false
+                            type: INPUT_FIELD_TYPE_GROUP
+                            group_props:
+                                members:
+                                    values:
+                                        - 4e7cb3c9-a58c-4675-996a-8664cc0f91bf
+                                        - bab3c985-6d80-4f85-8929-33bdec7f1036
+                        b8a72198-01a2-456a-89f9-693f19c79851:
+                            id: b8a72198-01a2-456a-89f9-693f19c79851
+                            name: intrfProfiles
+                            label: 'Interface Profiles'
+                            description: ""
+                            required: false
+                            type: INPUT_FIELD_TYPE_COLLECTION
+                            collection_props:
+                                base_field_id: 5f0a7259-bce9-4a7b-b4fc-c0fd62af417d
+                                key: ""
+                        root:
+                            id: root
+                            name: ""
+                            label: ""
+                            description: ""
+                            required: false
+                            type: INPUT_FIELD_TYPE_GROUP
+                            group_props:
+                                members:
+                                    values:
+                                        - f298a75b-b9f1-468b-a7a1-ecb80544faa0
+                                        - b8a72198-01a2-456a-89f9-693f19c79851
+                layout:
+                    value: '{"28f8c447-a5d4-48fb-b849-fe499064698a":{"key":"28f8c447-a5d4-48fb-b849-fe499064698a","type":"INPUT","order":["6094cce9-f5c4-44b2-b4b1-4f20006b071b","96a1b000-e07b-468b-bb75-c8614a389b90"]}}'
