@@ -1,0 +1,628 @@
+{
+  "dashboards": [
+    {
+      "key": "d81f32eb-9a34-4252-af65-0c6b1c353468",
+      "createdAt": "2022-01-11T17:08:28.473Z",
+      "createdBy": "cvpadmin",
+      "metaData": {
+        "schemaVersion": "3",
+        "legacyKey": "",
+        "legacyVersion": ""
+      },
+      "name": "AQL Data Type Displays",
+      "description": "Data type examples #AQL #DataTypes #Examples",
+      "widgets": [
+        {
+          "id": "8c51dafc-e496-4a9d-b09a-b6ef5156ad99",
+          "name": "",
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 7,
+            "height": 8
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "expression": "let output = newDict() | setFields(\\\n  \"RowName1\", newDict() | setFields(\\\n    \"ColumnKey1\", \"Value1a\",\\\n    \"ColumnKey2\", \"Value1b\",\\\n    \"ColumnKey3\", \"Value1c\"),\\\n  \"RowName2\", newDict() | setFields(\\\n    \"ColumnKey1\", \"Value2a\",\\\n    \"ColumnKey2\", \"Value2b\",\\\n    \"ColumnKey3\", \"Value2c\"),\\\n  \"RowName3\", newDict() | setFields(\\\n    \"ColumnKey1\", \"Value3a\",\\\n    \"ColumnKey2\", \"Value3b\",\\\n    \"ColumnKey3\", \"Value3c\")\\\n)\noutput\n",
+            "visualization": "table"
+          },
+          "location": "main"
+        },
+        {
+          "id": "05f23a92-c4bb-44d7-bf8d-36c5513b7981",
+          "name": "",
+          "position": {
+            "x": 7,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 5,
+            "height": 5
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "expression": "let output = \"Data Value Here\"\noutput",
+            "visualization": "singleValue",
+            "graphConfig": {
+              "fontSize": 30,
+              "description": "Data Value Description"
+            }
+          },
+          "location": "main"
+        },
+        {
+          "id": "d7d3a9c0-59c4-44e3-9591-96c6e8548220",
+          "name": "",
+          "position": {
+            "x": 12,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 6,
+            "height": 8
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "expression": "let output = newDict() | setFields(\\\n    \"Bar1\",10,\\\n    \"Bar2\",20,\\\n    \"Bar3\",5,\\\n    \"Bar4\",15,\\\n    \"Bar5\",25)\noutput",
+            "visualization": "barGraph",
+            "graphConfig": {
+              "colorScheme": "multicolor"
+            }
+          },
+          "location": "main"
+        },
+        {
+          "id": "c725618e-ce34-432f-8890-a9548a285e00",
+          "name": "Some Random Time Series",
+          "position": {
+            "x": 8,
+            "y": 8
+          },
+          "dimensions": {
+            "width": 8,
+            "height": 11
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "visualization": "lineGraph",
+            "graphConfig": {
+              "showLegend": false,
+              "mapToHostname": true,
+              "showPoints": false,
+              "displayMultipleInTooltip": true
+            },
+            "expression": "let load1 = `2EAA2ECDB0CD9D9C997C846D3F4D20ED:/Kernel/sysinfo`[7h] | field(\"loadAvg5m\") | map(_value * 100)\nlet load2 = `6C2F686842231DE25FBDD187DB5A777B:/Kernel/sysinfo`[7h] | field(\"loadAvg5m\") | map(_value * 100)\nnewDict() | setFields(\"2EAA2ECDB0CD9D9C997C846D3F4D20ED\",load1,\\\n            \"6C2F686842231DE25FBDD187DB5A777B\",load2)\n#`analytics:/Devices/*/versioned-data/hardware/cpu/total/aggregate/15m`[10h] | map(_value | field(\"loadAvg15m\") | field(\"avg\"))"
+          },
+          "location": "main"
+        },
+        {
+          "id": "9719411a-1531-4a32-b567-2f7d0b4b3f05",
+          "name": "",
+          "position": {
+            "x": 18,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 5,
+            "height": 8
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "expression": "let output = newDict() | setFields(\\\n    \"Bar1\",10,\\\n    \"Bar2\",20,\\\n    \"Bar3\",5,\\\n    \"Bar4\",15,\\\n    \"Bar5\",25)\noutput",
+            "visualization": "donutGraph"
+          },
+          "location": "main"
+        }
+      ],
+      "lastUpdated": 1646995060821,
+      "lastUpdatedBy": "cvpadmin"
+    },
+    {
+      "key": "d7cbbbf8-21f9-48eb-9132-cfa57693118e",
+      "createdAt": "2021-12-09T18:10:25.319Z",
+      "createdBy": "cvpadmin",
+      "metaData": {
+        "schemaVersion": "3",
+        "legacyKey": "",
+        "legacyVersion": ""
+      },
+      "name": "AQL NTP Test Dashboard",
+      "description": "#AQL #NTP #Examples",
+      "widgets": [
+        {
+          "id": "82c844c7-c6d5-4d09-8da7-831a4e5e8022",
+          "name": "NTP Peers - AQL",
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 9,
+            "height": 12
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "expression": "let ntpData = `*:/NTP/status/system/variables`[0] | map(merge(_value))\nlet output = newDict()\nfor devID,devData in ntpData{\n    output[devID] = newDict()\n    output[devID][\"peer\"]= devData[\"refid\"]\n    output[devID][\"Stratum\"]=devData[\"stratum\"]\n    output[devID][\"OffSet\"]=devData[\"offset\"]\n    }\noutput",
+            "visualization": "table",
+            "graphConfig": {
+              "columns": {
+                "Stratum": {
+                  "type": "number",
+                  "decimals": 0,
+                  "colorMappings": [
+                    {
+                      "type": "range",
+                      "options": {
+                        "from": 0,
+                        "to": 2,
+                        "result": {
+                          "color": "green",
+                          "index": 0
+                        }
+                      }
+                    },
+                    {
+                      "type": "range",
+                      "options": {
+                        "from": 3,
+                        "to": 3,
+                        "result": {
+                          "color": "yellow",
+                          "index": 1
+                        }
+                      }
+                    },
+                    {
+                      "type": "range",
+                      "options": {
+                        "from": 5,
+                        "to": 10,
+                        "result": {
+                          "color": "red",
+                          "index": 2
+                        }
+                      }
+                    },
+                    {
+                      "type": "range",
+                      "options": {
+                        "from": 4,
+                        "to": 4,
+                        "result": {
+                          "color": "purple",
+                          "index": 3
+                        }
+                      }
+                    }
+                  ]
+                },
+                "key": {
+                  "mapToHostname": true
+                }
+              }
+            }
+          },
+          "location": "main"
+        },
+        {
+          "id": "6ae220a4-adf6-4462-84ce-44e66ef5adde",
+          "name": "NTP Offset",
+          "position": {
+            "x": 9,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 8,
+            "height": 12
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "expression": "`*:/NTP/status/system/variables`[1h] | map((_value | field(\"offset\") | map(num(_value))),)",
+            "visualization": "lineGraph",
+            "graphConfig": {
+              "showLegend": true,
+              "mapToHostname": true,
+              "displayMultipleInTooltip": true,
+              "stacked": false,
+              "min": -2,
+              "max": 2,
+              "showPoints": true
+            }
+          },
+          "location": "main"
+        },
+        {
+          "id": "84c67b89-c3e3-4d26-91de-8db7b42e2e87",
+          "name": "NTP Dispersion",
+          "position": {
+            "x": 17,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 7,
+            "height": 12
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "expression": "`*:/NTP/status/system/variables`[70m] | map((_value | field(\"rootdisp\") | map(num(_value))),)",
+            "visualization": "lineGraph",
+            "graphConfig": {
+              "showLegend": true,
+              "mapToHostname": true,
+              "showPoints": false,
+              "stacked": false,
+              "displayMultipleInTooltip": false
+            }
+          },
+          "location": "main"
+        }
+      ],
+      "lastUpdated": 1646994936469,
+      "lastUpdatedBy": "cvpadmin"
+    },
+    {
+      "key": "29a153c5-5a8a-4b29-b8a4-c5072a877f5e",
+      "createdAt": "2022-01-13T18:06:25.647Z",
+      "createdBy": "cvpadmin",
+      "metaData": {
+        "schemaVersion": "3",
+        "legacyKey": "",
+        "legacyVersion": ""
+      },
+      "name": "Topology Explore",
+      "description": "#Topology #Examples",
+      "widgets": [
+        {
+          "id": "d053d80a-4186-45d6-91b0-4406400e6c08",
+          "name": "Link Status by Container",
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 8,
+            "height": 13
+          },
+          "type": "topology-widget",
+          "inputs": {
+            "useDeviceImages": true,
+            "showActiveEvents": false,
+            "overlay": "operStatus",
+            "selectedCustomTags": [
+              "Container"
+            ]
+          },
+          "location": "main"
+        },
+        {
+          "id": "cd6197ea-08cf-4102-932f-8580bc372be9",
+          "name": "Event Status by Device",
+          "position": {
+            "x": 8,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 7,
+            "height": 10
+          },
+          "type": "topology-widget",
+          "inputs": {
+            "selectedCustomTags": [
+              "Device"
+            ],
+            "useDeviceImages": true,
+            "overlay": "activeEvents",
+            "showActiveEvents": true
+          },
+          "location": "main"
+        },
+        {
+          "id": "93c318ce-3ac2-4c5e-889c-65fcfd75a921",
+          "name": "Campus VLANs",
+          "position": {
+            "x": 15,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 9,
+            "height": 13
+          },
+          "type": "topology-widget",
+          "inputs": {
+            "overlay": "vlans",
+            "tags": "topology_campus:CTL2 ",
+            "selectedCustomTags": [
+              "Campus Building"
+            ],
+            "useDeviceImages": true,
+            "showVxlanTunnels": true
+          },
+          "location": "main"
+        },
+        {
+          "id": "f7b1841b-a228-411b-b98a-95c3ca3d72c1",
+          "name": "",
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 4,
+            "height": 2
+          },
+          "type": "input-widget",
+          "inputs": {
+            "inputName": "Container",
+            "tagLabel": "Container",
+            "inputSource": "devices"
+          },
+          "location": "inputs"
+        },
+        {
+          "id": "380f15b4-e191-4873-9239-6704e98101e5",
+          "name": "",
+          "position": {
+            "x": 4,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 4,
+            "height": 2
+          },
+          "type": "input-widget",
+          "inputs": {
+            "inputName": "Device",
+            "tagLabel": "device",
+            "inputSource": "devices"
+          },
+          "location": "inputs"
+        },
+        {
+          "id": "5280358b-c2bb-48d1-93f0-5dbcb69262fe",
+          "name": "",
+          "position": {
+            "x": 8,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 4,
+            "height": 2
+          },
+          "type": "input-widget",
+          "inputs": {
+            "inputName": "Campus Building",
+            "tagLabel": "topology_hint_building",
+            "inputSource": "devices"
+          },
+          "location": "inputs"
+        }
+      ],
+      "lastUpdated": 1646995018516,
+      "lastUpdatedBy": "cvpadmin"
+    },
+    {
+      "key": "fe203916-5f33-4802-91e3-1255bd4fb466",
+      "createdAt": "2022-01-06T15:10:18.385Z",
+      "createdBy": "cvpadmin",
+      "metaData": {
+        "schemaVersion": "3",
+        "legacyKey": "",
+        "legacyVersion": ""
+      },
+      "name": "AQL Explore CPU Dashboard",
+      "description": "#AQL #CPU #Examples",
+      "widgets": [
+        {
+          "id": "ef2a10d7-259c-4901-809a-20f93c0c38a5",
+          "name": "15 Minute CPU load last 6 hours",
+          "position": {
+            "x": 0,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 8,
+            "height": 10
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "expression": "`analytics:/Devices/<_Device>/versioned-data/hardware/cpu/total/aggregate/15m`[6h]\\\n  | field(\"loadAvg15m\") \\\n  | field(\"avg\") \\\n  | map(_value * 100)",
+            "visualization": "barGraph",
+            "graphConfig": {
+              "orientation": "vertical",
+              "colorScheme": "singleColor",
+              "unit": "hours",
+              "mapToHostname": true
+            }
+          },
+          "location": "main"
+        },
+        {
+          "id": "7282fb4a-212f-4d18-805e-3b09bb8d87dc",
+          "name": "Single Device Last hour 5 minute Load Average",
+          "position": {
+            "x": 8,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 8,
+            "height": 10
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "visualization": "lineGraph",
+            "graphConfig": {
+              "showLegend": true,
+              "mapToHostname": true,
+              "stacked": false,
+              "showPoints": false
+            },
+            "expression": "let load = `<_Device>:/Kernel/sysinfo`[1h]\\\n    | field(\"loadAvg5m\")\\\n    | map(_value * 100)\nnewDict() | setFields(_Device,load)"
+          },
+          "location": "main"
+        },
+        {
+          "id": "b3ab7cfc-88c3-4581-bda8-8c2d6c587311",
+          "name": "Memory Allocation",
+          "position": {
+            "x": 16,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 4,
+            "height": 10
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "expression": "let sysInfo = merge(`<_Device>:/Kernel/sysinfo`)\nlet usageDict = newDict()\nusageDict[\"Free Memory\"] = sysInfo[\"freeram\"]\nusageDict[\"Shared Memory\"] = sysInfo[\"sharedram\"]\nusageDict[\"Buffer Memory\"] = sysInfo[\"bufferram\"]\nusageDict[\"Unallocated Memory\"] = sysInfo[\"totalram\"] - \\\n  (sysInfo[\"freeram\"]+sysInfo[\"sharedram\"]+sysInfo[\"bufferram\"])\nusageDict",
+            "visualization": "donutGraph"
+          },
+          "location": "main"
+        },
+        {
+          "id": "0b17e19d-8e55-41f2-8168-2baaa1df7eba",
+          "name": "CPU Allocation",
+          "position": {
+            "x": 20,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 4,
+            "height": 10
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "visualization": "donutGraph",
+            "expression": "let cpuInfo = merge(`<_Device>:/Kernel/proc/cpu/utilization/total`)\nlet usageDict = newDict()\nusageDict[\"Idle\"] = cpuInfo[\"idle\"]\nusageDict[\"System\"] = cpuInfo[\"system\"]\nusageDict[\"User\"] = cpuInfo[\"user\"]\nusageDict"
+          },
+          "location": "main"
+        },
+        {
+          "id": "19c42fce-c2ed-4ea7-a675-24fefb36f2b1",
+          "name": "Device Stats",
+          "position": {
+            "x": 0,
+            "y": 10
+          },
+          "dimensions": {
+            "width": 24,
+            "height": 11
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "expression": "let sysInfo = `*:/Kernel/sysinfo`[15m] \\\n|map(merge(_value)| fields(\"freeram\",\"sharedram\",\"bufferram\"))\n\nlet cpuInfo = `*:/Kernel/proc/cpu/utilization/total`[15m] \\\n|map(merge(_value)| fields(\"idle\",\"system\",\"user\"))\n\nlet output = newDict()\nfor sysKey,sysValue in sysInfo {\n  output[sysKey] = newDict()\n  for subKey,subValue in sysValue{\n    output[sysKey][subKey] = subValue\n  }\n  for cpuKey,cpuValue in cpuInfo[sysKey]{\n    output[sysKey][cpuKey] = cpuValue\n  }\n}\noutput",
+            "visualization": "table",
+            "graphConfig": {
+              "columns": {
+                "key": {
+                  "mapToHostname": true
+                }
+              }
+            }
+          },
+          "location": "main"
+        },
+        {
+          "id": "e99fc8b1-290d-4c5a-b290-a87bb1b633b7",
+          "name": "",
+          "position": {
+            "x": 0,
+            "y": 21
+          },
+          "dimensions": {
+            "width": 18,
+            "height": 15
+          },
+          "type": "topology-widget",
+          "inputs": {
+            "selectedCustomTags": [
+              "Container"
+            ],
+            "showActiveEvents": true,
+            "useDeviceImages": true
+          },
+          "location": "main"
+        },
+        {
+          "id": "57497417-51f5-492f-92b7-fc033aa51845",
+          "name": "",
+          "position": {
+            "x": 18,
+            "y": 21
+          },
+          "dimensions": {
+            "width": 6,
+            "height": 14
+          },
+          "type": "events-widget",
+          "inputs": {
+            "selectedCustomTags": [
+              "Container"
+            ],
+            "showActiveOnly": true
+          },
+          "location": "main"
+        },
+        {
+          "id": "19608749-f48c-4dbd-a0c3-6bb32f0b1621",
+          "name": "",
+          "position": {
+            "x": 0,
+            "y": 36
+          },
+          "dimensions": {
+            "width": 8,
+            "height": 10
+          },
+          "type": "aql-query-widget",
+          "inputs": {
+            "expression": "`<_Device>:/Kernel/vfs/stat`[6h] | field(\"/mnt/flash:\")",
+            "visualization": "table"
+          },
+          "location": "main"
+        },
+        {
+          "id": "11d3560d-8ec7-4991-9253-d3c7e2f0445a",
+          "name": "",
+          "position": {
+            "x": 10,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 4,
+            "height": 2
+          },
+          "type": "input-widget",
+          "inputs": {
+            "inputName": "Device",
+            "tagLabel": "device",
+            "inputSource": "devices"
+          },
+          "location": "inputs"
+        },
+        {
+          "id": "d4ab7278-ec1c-4f78-8840-2a1526266b96",
+          "name": "",
+          "position": {
+            "x": 2,
+            "y": 0
+          },
+          "dimensions": {
+            "width": 4,
+            "height": 2
+          },
+          "type": "input-widget",
+          "inputs": {
+            "inputName": "Container",
+            "tagLabel": "Container",
+            "inputSource": "devices"
+          },
+          "location": "inputs"
+        }
+      ],
+      "lastUpdated": 1646994905747,
+      "lastUpdatedBy": "cvpadmin"
+    }
+  ]
+}

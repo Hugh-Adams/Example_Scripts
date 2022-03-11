@@ -22,7 +22,16 @@ These scripts can be imported into CVP via the CVP CLI using the script-util uti
 
 A simple example script to demonstrate the use of the EOS API.
 
-** Tools **
+**CVP_Studios**
+
+Some simple examples to explore the use of CloudVision Studios.
+These examples can be directly imported into Studios via a Studios Workspace.
+
+**CVP_AQL**
+
+Some simple examples to explore the use of CloudVision Advanced Query Language (AQL).
+These examples can be directly imported into the Dashboards view.
+
+**Tools**
 
 A collections of useful tools developed for various projects but not strictly Arista Orientated
-
