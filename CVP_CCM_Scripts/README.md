@@ -24,6 +24,35 @@ Change Control script that uses the arguments provided by device_ping.yaml to ch
 
 The script uses paramiko to access each client using SSH and then executes a ping command to each target.
 
+**EOS_ping**
+
+Change Control script that uses the arguments change control actions static arguments to check connectivity between a number of EOS devices and their targets. The arguments are as follows:
+   ctx - provides information about current device in change control
+   targetList - list of devices to ping from the Linux clients
+   passmark   - percentage of received pings required to Pass each ping test
+   failCount  - number of ping tests that can fail before the ping_device script fails
+   pingCount  - number of Pings to send from each client to each target
+   timeout    - time to wait for each ping process to complete, this prevents script from hanging if the pings
+                  fail or take too long
+   vrf        - VRF instance for ping command to execute in.
+
+The script uses ctx.runDeviceCmds to execute command instructions, ping etc, on the switch
+
+**Linux_ping**
+
+Change Control script that uses the arguments provided by Change Control Action static arguments to check connectivity between a number of Linux client devices and their targets. The arguments are as follows:
+   deviceList - list of Linux clients to ping the target list from
+   targetList - list of devices to ping from the Linux clients
+   passmark   - percentage of received pings required to Pass each ping test
+   failCount  - number of ping tests that can fail before the ping_device script fails
+   username   - username to access the Linux clients
+   password   - password to use to the client access devices
+   pingCount  - number of Pings to send from each client to each target
+   timeout    - time to wait for each ping process to complete, this prevents script from hanging if the pings
+                  fail or take too long
+
+The script uses paramiko to access each client using SSH and then executes a ping command to each target.
+
 **page_check**
 
 Change Control script that uses the arguments provided by page_check.yaml to check if a web page is reachable from a number of client devices. The arguments in the yaml file are as follows:
