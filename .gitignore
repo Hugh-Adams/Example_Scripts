@@ -115,3 +115,5 @@ CVP_API/Copy_Custom_Events/CV_Resource_APIs.code-workspace
 CVP_API/Copy_Custom_Events/backupSourceCVP.json
 CVP_API/Copy_Custom_Events/.DS_Store
 CVP_API/.DS_Store
+.DS_Store
+CVP_API/Snapshot_Utils/.DS_Store

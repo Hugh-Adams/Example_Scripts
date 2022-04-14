@@ -91,7 +91,8 @@ def login(url_prefix, username, password, supported_api=True):
     if response.json()["sessionId"]:
         token = response.json()["sessionId"]
         if supported_api:
-            sslcert = ssl.get_server_certificate((url_prefix, 8443))
+            #sslcert = ssl.get_server_certificate((url_prefix, 8443))
+            sslcert = ssl.get_server_certificate((url_prefix, 443))
         else:
             sslcert = ssl.get_server_certificate((url_prefix, 9900))
         print (f"Logged into {url_prefix}")
@@ -250,7 +251,8 @@ def main(server, cvp_user, cvp_pass, device='ALL', ss_name='all', token=None, ce
     fullPath = str(os.path.abspath(os.path.dirname(sys.argv[0])))+"/snapshots/"
     print(f"Files will be saved to: {fullPath}\n")
     if supported_api:
-        print("Using supported API on port 8443")
+        #print("Using supported API on port 8443")
+        print("Using supported API on port 443")
         if not token:
             token = "token.txt"
         if not ca:
@@ -262,7 +264,8 @@ def main(server, cvp_user, cvp_pass, device='ALL', ss_name='all', token=None, ce
             f.write(creds[0])
         with open(ca, "w") as f:
             f.write(creds[1])
-        client = get_client(f"{server}:8443",token=token, key=key, ca=ca, certs=certs)
+        #client = get_client(f"{server}:8443", token=token, key=key, ca=ca, certs=certs)
+        client = get_client(f"{server}:443", token=token, key=key, ca=ca, certs=certs)
     else:
         print("Using unsupported API on port 9900")
         if not ca:
