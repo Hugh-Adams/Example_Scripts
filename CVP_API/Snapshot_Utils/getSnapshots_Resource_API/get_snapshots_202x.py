@@ -88,7 +88,6 @@ def login(url_prefix, username, password, supported_api=True):
         timeout=connect_timeout,
         verify=False,
     )
-    print(response)
     if response.json()["sessionId"]:
         token = response.json()["sessionId"]
         if supported_api:
