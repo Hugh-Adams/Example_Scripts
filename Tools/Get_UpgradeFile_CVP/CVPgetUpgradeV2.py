@@ -63,12 +63,15 @@ def main (args):
     # Create Folder Path
     # Major Release
     upgradeFile=str(fileParts[0])+"."+str(fileParts[1])+"/"
+    altUpgradeFile = str(fileParts[0])+"."+str(fileParts[1])+"/"
     # Release Revision
     upgradeFile=upgradeFile+str(fileParts[0])+"."+str(fileParts[1])+"."+str(fileParts[2])+"/"
     # File Name
     upgradeFile=upgradeFile+args.upgrade
+    altUpgradeFile = altUpgradeFile+args.upgrade
     # Create Download URL
     url = filePath+upgradeFile
+    alturl = filePath+altUpgradeFile
     if args.test:
         saveFile = str(os.path.abspath(os.path.dirname(sys.argv[0])))+"/"+args.upgrade
     else:
@@ -108,20 +111,28 @@ def main (args):
     download_link_url = "https://www.arista.com/custom_data/api/cvp/getDownloadLink/"
     jsonpost = {'sessionCode': session_code, 'filePath': url}
     result = session.post(download_link_url, data=json.dumps(jsonpost))
-    download_link = (result.json()["data"]["url"])
-    if args.test:
-        print ("Server Response: %s\nResponse Data: %s}" %(result,result.json()))
-    
-    if not args.nofile:
-        # Download the file
-        chunkSize = 1024
-        r = session.get(download_link, stream=True)
-        with open(saveFile, 'wb') as fh:
-            for chunk in r.iter_content(chunk_size=chunkSize): 
-                if chunk: # filter out keep-alive new chunks
-                    fh.write(chunk)
+    # If the minor revision was not include in the Web Site URL an Error may be produced
+    # Try downloading without the minor release
+    if 'Not Found' in str(result.json()):
+        jsonpost = {'sessionCode': session_code, 'filePath': alturl}
+        result = session.post(download_link_url, data=json.dumps(jsonpost))
+    if 'data' in result.json().keys():
+        download_link = (result.json()["data"]["url"])
+        if args.test:
+            print (f"\nServer Response: {result}\nResponse Data:{result.json()}")
+        
+        if not args.nofile:
+            # Download the file
+            chunkSize = 1024
+            r = session.get(download_link, stream=True)
+            with open(saveFile, 'wb') as fh:
+                for chunk in r.iter_content(chunk_size=chunkSize): 
+                    if chunk: # filter out keep-alive new chunks
+                        fh.write(chunk)
 
-        print(result)
+            print(result)
+    else:
+        print(f"Unexpected result from URL fetch:\n\tfile path URL - {jsonpost['filePath']} \n\tresponse - {result.json()}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

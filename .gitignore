@@ -117,3 +117,8 @@ CVP_API/Copy_Custom_Events/.DS_Store
 CVP_API/.DS_Store
 .DS_Store
 CVP_API/Snapshot_Utils/.DS_Store
+CVP_API/Metrics_Export/10.83.30.100_cert.txt
+CVP_API/Metrics_Export/10.83.30.100_token.txt
+.gitignore
+CVP_API/Metrics_Export/10.83.30.102_cert.txt
+CVP_API/Metrics_Export/10.83.30.102_token.txt
