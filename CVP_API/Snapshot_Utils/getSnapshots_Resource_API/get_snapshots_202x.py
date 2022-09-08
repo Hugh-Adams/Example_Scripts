@@ -186,10 +186,17 @@ def query_snapshots(client):
                 snapshot 
                 ]
             for configs in get(client, dataset, resultElts):
-                for element in configs[snapshot]:
-                    result[element] = configs[snapshot][element]
-                result['note'] = configs['note']
-                result['status']= configs['status']
+                print(f"Reading configs for {snapshot}")
+                if configs.get(snapshot):
+                    for element in configs[snapshot]:
+                        if configs[snapshot].get(element):
+                            result[element] = configs[snapshot][element]
+                        else:
+                            print(f"{snapshot} doesn't contain element {element}. Not adding to results.")
+                    result['note'] = configs['note']
+                    result['status']= configs['status']
+                else:
+                    print(f"Configuration doesn't contain a {snapshot} key. Configuration:\n{configs}")
             yield result
 
 def query_ssResults(client, device_id, ss_id):
@@ -281,98 +288,119 @@ def main(server, cvp_user, cvp_pass, device='ALL', ss_name='all', token=None, ce
     device_list = {}
     
     print("\n######  Gather Device Info  #####\n")
-    print("   Devices Found:")
-    for dev_item in query_devices(client):
-        if device in dev_item['hostname'].upper() or device == 'ALL':
-            print(f"      {dev_item['hostname']}")
-            device_list[dev_item['serial']]={}
-            device_list[dev_item['serial']]['hostname']=dev_item['hostname']
-            device_list[dev_item['serial']]['snapshot']={}
+    if query_devices(client):
+        print("   Devices Found:")
+        for dev_item in query_devices(client):
+            if device in dev_item['hostname'].upper() or device == 'ALL':
+                print(f"      {dev_item['hostname']}")
+                device_list[dev_item['serial']]={}
+                device_list[dev_item['serial']]['hostname']=dev_item['hostname']
+                device_list[dev_item['serial']]['snapshot']={}    
     
-    print("\n#####  Gather Snapshot IDs and associate it with Devices  #####")
-    for ss_item in query_snapshots(client):
-        # Only add required Snapshots to devices
-        if ss_name in ss_item['Name'].lower() or ss_name == 'all':
-            print(f"\n   Snapshot: {ss_item['Name']}")
-            for command in ss_item['CommandList']:
-                print(f"      {command}")
-            if len(ss_item['DeviceList']) > 0:
-                for ss_device in ss_item['DeviceList']:
-                    if ss_device in device_list:
-                        if ss_item['snapshot_id'] not in device_list[ss_device]['snapshot']:
-                            device_list[ss_device]['snapshot'][ss_item['snapshot_id']] = {}
-                            device_list[ss_device]['snapshot'][ss_item['snapshot_id']]['name']=ss_item['Name']
-                            device_list[ss_device]['snapshot'][ss_item['snapshot_id']]['type']="scheduled"
-            else:
-                for device in device_list:
-                    device_list[device]['snapshot'][ss_item['snapshot_id']] = {}
-                    device_list[device]['snapshot'][ss_item['snapshot_id']]['name'] = ss_item['Name']
-                    device_list[device]['snapshot'][ss_item['snapshot_id']]['type'] = "ad_hoc"
-    
-    print("\n#####  Collect Snapshot Results for each Device  #####\n")
-    for device_id in device_list:
-        cleanup_list = []
-        for ss_id in device_list[device_id]['snapshot']:
-            snapshot_output = query_ssResults(client, device_id, ss_id)
-            if debug:
-                print(f"Snapshot Results for {device_list[device_id]['hostname']} - {device_list[device_id]['snapshot'][ss_id]['name']}\
-                    \n{snapshot_output}\n")
-            # Update Snapshot data for Snapshots with results
-            if len(snapshot_output) > 0:
-                print(f"{device_list[device_id]['hostname']} - {device_list[device_id]['snapshot'][ss_id]['name']} Updated ")
-                device_list[device_id]['snapshot'][ss_id].update(snapshot_output)
-            # Add empty Snapshot / ss_id to cleanup list
-            else:
-                cleanup_list.append(ss_id)
-        # Clean up empty Snapshot entries on device
-        for remove_ss_id in cleanup_list:
-            print(f"{device_list[device_id]['hostname']} - {device_list[device_id]['snapshot'][remove_ss_id]['name']} Removed ")
-            del device_list[device_id]['snapshot'][remove_ss_id]
-
-    print("\n##########  Device List  ###########")
-    for device in device_list:
-        report_name = str(fullPath)+str(device_list[device]['hostname'])+"_Snapshots.txt"
-        showTec = str(fullPath)+str(device_list[device]['hostname'])+"_showTec.txt"
-        showJSON = str(fullPath)+str(device_list[device]['hostname'])+"_showTec.json"
-        saveJSON = False
-        print(f"\n   Device Name:{device_list[device]['hostname']} - {device}\n      Snapshots:")
-        for snapshot in device_list[device]['snapshot']:
-            print(f"         {device_list[device]['snapshot'][snapshot]['name']}")
-            if debug:
-                print(f"Snapshot-data: {device_list[device]['snapshot'][snapshot]}")
-        print(
-            f"\n   Creating Snapshot Report for {device_list[device]['hostname']}\n")
-        # Create Text Report from Snapshot
-        deviceReport = "Snapshot Text Report for %s\n" %str(device_list[device]['hostname'])
-        deviceJSON = {"report":"Snapshot JSON Report for %s" %str(device_list[device]['hostname'])}
-        for snapshot_id in device_list[device]['snapshot']:
-            for commandEntry in device_list[device]['snapshot'][snapshot_id]:
-                if 'show' in commandEntry:
-                    if device_list[device]['snapshot'][snapshot_id][commandEntry]['error'] == "":
-                        response = device_list[device]['snapshot'][snapshot_id][commandEntry]['output']
+        print("\n#####  Gather Snapshot IDs and associate it with Devices  #####")
+        if query_snapshots(client):
+            for ss_item in query_snapshots(client):
+                # Only add required Snapshots to devices
+                if ss_item.get('Name') or ss_name == 'all':
+                    ss_item_name = ss_item.get('Name')
+                    if ss_item_name:
+                        ss_item_name = ss_item_name.lower()
                     else:
-                        response = device_list[device]['snapshot'][snapshot_id][commandEntry]['error']
+                        ss_item_name = ''
+                    if ss_name in ss_item_name or ss_name == 'all':
+                        print(f"\n   Snapshot: {ss_name}")
+                        if ss_item.get('CommandList'):
+                            for command in ss_item['CommandList']:
+                                print(f"      {command}")
+                        else:
+                            print(f"      No commands found")
+                        if ss_item.get('DeviceList'):
+                            if len(ss_item['DeviceList']) > 0:
+                                for ss_device in ss_item['DeviceList']:
+                                    if ss_device in device_list:
+                                        if ss_item['snapshot_id'] not in device_list[ss_device]['snapshot']:
+                                            device_list[ss_device]['snapshot'][ss_item['snapshot_id']] = {}
+                                            device_list[ss_device]['snapshot'][ss_item['snapshot_id']]['name']=ss_item['Name']
+                                            device_list[ss_device]['snapshot'][ss_item['snapshot_id']]['type']="scheduled"
+                            else:
+                                for device in device_list:
+                                    device_list[device]['snapshot'][ss_item['snapshot_id']] = {}
+                                    device_list[device]['snapshot'][ss_item['snapshot_id']]['name'] = ss_item['Name']
+                                    device_list[device]['snapshot'][ss_item['snapshot_id']]['type'] = "ad_hoc"
+                        else:
+                            print(f"      No devices found in snapshot")
+                else:
+                    print("   No snapshot names found!")
+        else:
+            print("   No snapshot IDs found!")
+        
+        print("\n#####  Collect Snapshot Results for each Device  #####\n")
+        for device_id in device_list:
+            cleanup_list = []
+            for ss_id in device_list[device_id]['snapshot']:
+                snapshot_output = query_ssResults(client, device_id, ss_id)
+                if debug:
+                    print(f"Snapshot Results for {device_list[device_id]['hostname']} - {device_list[device_id]['snapshot'][ss_id]['name']}\
+                        \n{snapshot_output}\n")
+                # Update Snapshot data for Snapshots with results
+                if len(snapshot_output) > 0:
+                    print(f"{device_list[device_id]['hostname']} - {device_list[device_id]['snapshot'][ss_id]['name']} Updated ")
+                    device_list[device_id]['snapshot'][ss_id].update(snapshot_output)
+                # Add empty Snapshot / ss_id to cleanup list
+                else:
+                    cleanup_list.append(ss_id)
+            # Clean up empty Snapshot entries on device
+            for remove_ss_id in cleanup_list:
+                print(f"{device_list[device_id]['hostname']} - {device_list[device_id]['snapshot'][remove_ss_id]['name']} Removed ")
+                del device_list[device_id]['snapshot'][remove_ss_id]
+
+        print("\n##########  Device List  ###########")
+        for device in device_list:
+            report_name = str(fullPath)+str(device_list[device]['hostname'])+"_Snapshots.txt"
+            showTec = str(fullPath)+str(device_list[device]['hostname'])+"_showTec.txt"
+            showJSON = str(fullPath)+str(device_list[device]['hostname'])+"_showTec.json"
+            saveJSON = False
+            if len(device_list[device]['snapshot']) > 0:
+                print(f"\n   Device Name:{device_list[device]['hostname']} - {device}\n      Snapshots:")
+                for snapshot in device_list[device]['snapshot']:
+                    print(f"         {device_list[device]['snapshot'][snapshot]['name']}")
                     if debug:
-                        print(f"    Looking at command: {commandEntry}")
-                    if 'show tech' in commandEntry:
-                        saveTech = fileWrite(showTec, response, "txt", "w")
-                        if saveTech:
-                            print(f"    Show Tech report saved to: {showTec}")
-                    elif '| json' in commandEntry:
-                        saveJSON = True
-                        deviceJSON[str(commandEntry)]= json.loads(str(response))
-                    else:
-                        deviceReport += "\n%s\n" % str(commandEntry)
-                        deviceReport += str(response)
-                        deviceReport += "\n          ####################\n"
+                        print(f"Snapshot-data: {device_list[device]['snapshot'][snapshot]}")
+                print(
+                    f"\n   Creating Snapshot Report for {device_list[device]['hostname']}\n")
+                # Create Text Report from Snapshot
+                deviceReport = "Snapshot Text Report for %s\n" %str(device_list[device]['hostname'])
+                deviceJSON = {"report":"Snapshot JSON Report for %s" %str(device_list[device]['hostname'])}
+                for snapshot_id in device_list[device]['snapshot']:
+                    for commandEntry in device_list[device]['snapshot'][snapshot_id]:
+                        if 'show' in commandEntry:
+                            if device_list[device]['snapshot'][snapshot_id][commandEntry]['error'] == "":
+                                response = device_list[device]['snapshot'][snapshot_id][commandEntry]['output']
+                            else:
+                                response = device_list[device]['snapshot'][snapshot_id][commandEntry]['error']
+                            if debug:
+                                print(f"    Looking at command: {commandEntry}")
+                            if 'show tech' in commandEntry:
+                                saveTech = fileWrite(showTec, response, "txt", "w")
+                                if saveTech:
+                                    print(f"    Show Tech report saved to: {showTec}")
+                            elif '| json' in commandEntry:
+                                saveJSON = True
+                                deviceJSON[str(commandEntry)]= json.loads(str(response))
+                            else:
+                                deviceReport += "\n%s\n" % str(commandEntry)
+                                deviceReport += str(response)
+                                deviceReport += "\n          ####################\n"
 
-        saveReport = fileWrite(report_name, deviceReport, "txt", "w")
-        if saveReport:
-            print (f"    Audit Text report saved to: {report_name}")
-        if saveJSON:
-            saveJSONreport = fileWrite(showJSON, deviceJSON, "json", "w")
-            if saveJSONreport:
-                print (f"    Audit JSON report saved to: {showJSON}")
+                saveReport = fileWrite(report_name, deviceReport, "txt", "w")
+                if saveReport:
+                    print (f"    Audit Text report saved to: {report_name}")
+                if saveJSON:
+                    saveJSONreport = fileWrite(showJSON, deviceJSON, "json", "w")
+                    if saveJSONreport:
+                        print (f"    Audit JSON report saved to: {showJSON}")
+    else:
+        print("   No Devices Found!")
 
     print("\n##########  END  ##########")
 
