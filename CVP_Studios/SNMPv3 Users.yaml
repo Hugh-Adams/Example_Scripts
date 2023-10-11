@@ -1,0 +1,341 @@
+- service: arista.studio.v1.StudioConfigService
+  method: Set
+  body:
+    value:
+      key:
+        studio_id: f128cef2-35c8-46c6-98f1-7d866093ae8c
+        workspace_id: 0808af5a-90e0-4e89-bc9b-8161a427c4c2
+      display_name: SNMPv3 Users (Clone)
+      description: Assign Localized SNMPv3 Users to Devices
+      template:
+        type: TEMPLATE_TYPE_MAKO
+        body: |
+          <%
+          import hashlib
+
+          current_device = ctx.getDevice()
+          device_id = current_device.id
+          device_mac = current_device.mac
+          config_data = []
+
+          # Define the SNMP Engine ID for the current device
+          def snmpEngineID(dev_mac):
+            """
+              Return the SNMP Engine ID generated from the System MAC
+              or create random
+            """
+            return "f5717f" + str(dev_mac).replace(":", "") + "00"
+
+          def get_hasher(authType):
+            """
+              Return the required hash function based
+              on the authentication type required
+            """
+            if authType == 'md5':
+                hasher = hashlib.md5
+            elif authType == 'sha':
+                hasher = hashlib.sha1
+            elif authType == 'sha224':
+                hasher = hashlib.sha224
+            elif authType == 'sha256':
+                hasher = hashlib.sha256
+            elif authType == 'sha384':
+                hasher = hashlib.sha384
+            elif authType == 'sha512':
+                hasher = hashlib.sha512
+            else:
+                hasher = None
+            return hasher
+
+
+          def keyFromPassphrase(phrase, authType):
+            """
+              Generates a key from a passphrase as describe in RFC 2574 section A.2.
+              authType should be 'md5', 'sha', or 'sha(224|256|384|512)'.
+            """
+            # Commented out lines - Python 2
+            hasher = get_hasher(authType)
+            hashVal = hasher()
+            bytesLeft = 1048576  # 1Megabyte
+            concat = phrase.encode('utf-8')
+            # Concatenate phrase until its at least 64 characters long
+            while len(concat) < 64:
+                concat += phrase.encode('utf-8')
+            concatLen = len(concat)
+            # Hash the new Concatenated phrase until its 1Mb in length
+            while bytesLeft > concatLen:
+                hashVal.update(concat)
+                bytesLeft -= concatLen
+            if bytesLeft > 0:
+                hashVal.update(concat[0: bytesLeft])
+            # Create the hexadecimal value for the hashed phrase
+            ku = hashVal.digest()
+            return ku
+
+
+          def localizePassphrase(phrase, authType, engineID, privType):
+            """
+              Performs a key localization as described in RFC 2574 section 2.6.
+              phrase is the plain ASCII passphrase. 
+              [authType] - 'md5', 'sha', or 'sha(224|256|384|512)'.
+              [engineId] - *binary* value of the engineID.
+                (Not "8000757105..." but "\x80\x00\x75\x71\x05...")
+              [privType] - privacy protocol, 'des', 'aes', 'aes192' or 'aes256'
+                This is needed when we need to create a longer Localized Key (kul)
+                for a stronger privacy protocol.
+            """
+            engineId = bytearray.fromhex(engineID)
+            # Create Standard User Key Ku from phrase
+            ku = keyFromPassphrase(phrase, authType)
+            hasher = get_hasher(authType)
+            localHash = hasher()
+            # Localize the Standard Key by adding the local engineID to it
+            # Localized key - kul
+            localHash.update(ku + engineId + ku)
+            kul = localHash.digest()
+            kulHash = localHash.digest()
+            # Defined Number of Characters required for each hash type as used in EOS
+            reqLenMap = {'md5': 32, 'sha': 40,
+                         'sha224': 56, 'sha256': 64,
+                         'sha384': 96, 'sha512': 128,
+                         'des': 32, 'aes': 32,
+                         'aes192': 48, 'aes256': 64}
+            authLen = reqLenMap[authType.lower()]
+            privLen = reqLenMap[privType.lower()]
+            # From draft-blumenthal-aes-usm-04 section 3.1.2.1
+            # Ceiling Dived of privLen by authLen
+            concatCount = int(((privLen + (authLen-1))//authLen))
+            count = 1
+            while count < concatCount:
+              localHash = hasher()
+              localHash.update(kulHash)
+              kulHash = kulHash + localHash.digest()
+              count += 1
+            # Truncate in case we have too much.
+            kulHash = kulHash[: privLen]
+            return kul.hex(), kulHash.hex()
+
+          # Generate SNMP Engine ID from device_mac
+          # or last 8 digits of the serial number + padding
+          if device_mac == None:
+            engineID = snmpEngineID('acdf'+device_id[-8:])
+          else:
+            engineID = snmpEngineID(device_mac)
+          # Generate User details for each device
+          deviceUsers = deviceList.resolve()['snmpUsers']
+          # work through SNMP users for device to create conf data
+          for user in deviceUsers:
+            for userData in snmpUsers:
+              if user['userName'] == userData['userName']:
+                authKu,authKul = localizePassphrase(userData['authPass'], userData['authType'], engineID, userData['privType'])
+                privKu,privKul = localizePassphrase(userData['privPass'], userData['authType'], engineID, userData['privType'])
+                config_data.append({'user':user['userName'],'group':userData['groupName'],'engineID':engineID,'authType':userData['authType'],'authKu':authKu,'privType':userData['privType'],'privKu':privKu})
+          %>
+          !! Config SNMPv3 Users
+          %     for data in config_data:
+          snmp-server user ${data['user']} ${data['group']} v3 localized ${data['engineID']} auth ${data['authType']} ${data['authKu']} priv ${data['privType']} ${data['privKu']}
+          %     endfor
+          !! End of SNMPv3 Config
+      input_schema:
+        fields:
+          values:
+            8ec6014c-ac57-4e37-962d-d3e5fb493701:
+              id: 8ec6014c-ac57-4e37-962d-d3e5fb493701
+              name: userName
+              label: User Name
+              description: SNMP User Name
+              required: false
+              type: INPUT_FIELD_TYPE_STRING
+              string_props:
+                default_value: null
+                is_secret: false
+                static_options: null
+                format: null
+                length: null
+                pattern: null
+                dynamic_options: null
+                extra_values_allowed: false
+            e5e7422f-1664-48fc-a95b-00797e823b83:
+              id: e5e7422f-1664-48fc-a95b-00797e823b83
+              name: groupName
+              label: Group Name
+              description: User belongs to this SNMP group
+              required: false
+              type: INPUT_FIELD_TYPE_STRING
+              string_props:
+                default_value: public
+                is_secret: false
+                static_options: null
+                format: null
+                length: null
+                pattern: null
+                dynamic_options: null
+                extra_values_allowed: false
+            73b3d64b-ea7f-465f-bcd4-b372407b7211:
+              id: 73b3d64b-ea7f-465f-bcd4-b372407b7211
+              name: authType
+              label: Authentication Type
+              description: ''
+              required: false
+              type: INPUT_FIELD_TYPE_STRING
+              string_props:
+                default_value: sha512
+                is_secret: false
+                static_options:
+                  values:
+                    - md5
+                    - sha
+                    - sha224
+                    - sha256
+                    - sha384
+                    - sha512
+                format: null
+                length: null
+                pattern: null
+                dynamic_options: null
+                extra_values_allowed: false
+            d7aef8fb-535e-4f85-ad70-b24824854e8f:
+              id: d7aef8fb-535e-4f85-ad70-b24824854e8f
+              name: authPass
+              label: Authentication Pass Phrase
+              description: Authentication Password or Phrase
+              required: false
+              type: INPUT_FIELD_TYPE_STRING
+              string_props:
+                default_value: null
+                is_secret: true
+                static_options: null
+                format: null
+                length: null
+                pattern: null
+                dynamic_options: null
+                extra_values_allowed: false
+            27970484-bee7-4ad9-bc67-cc832a541b8e:
+              id: 27970484-bee7-4ad9-bc67-cc832a541b8e
+              name: privType
+              label: Privacy Type
+              description: Privacy Type
+              required: false
+              type: INPUT_FIELD_TYPE_STRING
+              string_props:
+                default_value: aes256
+                is_secret: false
+                static_options:
+                  values:
+                    - des
+                    - aes
+                    - aes192
+                    - aes256
+                format: null
+                length: null
+                pattern: null
+                dynamic_options: null
+                extra_values_allowed: false
+            307965f4-e58d-4533-8bb2-a3eccbad8e81:
+              id: 307965f4-e58d-4533-8bb2-a3eccbad8e81
+              name: privPass
+              label: Privacy Pass Phrase
+              description: Privacy Password or Phrase
+              required: false
+              type: INPUT_FIELD_TYPE_STRING
+              string_props:
+                default_value: null
+                is_secret: true
+                static_options: null
+                format: null
+                length: null
+                pattern: null
+                dynamic_options: null
+                extra_values_allowed: false
+            11a9dc23-9269-4733-9f92-2420ea335e40:
+              id: 11a9dc23-9269-4733-9f92-2420ea335e40
+              name: value
+              label: SNMP User
+              description: User Details
+              required: true
+              type: INPUT_FIELD_TYPE_GROUP
+              group_props:
+                members:
+                  values:
+                    - 8ec6014c-ac57-4e37-962d-d3e5fb493701
+                    - e5e7422f-1664-48fc-a95b-00797e823b83
+                    - 73b3d64b-ea7f-465f-bcd4-b372407b7211
+                    - d7aef8fb-535e-4f85-ad70-b24824854e8f
+                    - 27970484-bee7-4ad9-bc67-cc832a541b8e
+                    - 307965f4-e58d-4533-8bb2-a3eccbad8e81
+            857cf261-d276-4c30-9d4d-a49284ad0781:
+              id: 857cf261-d276-4c30-9d4d-a49284ad0781
+              name: snmpUsers
+              label: SNMP Users
+              description: SNMP User List
+              required: false
+              type: INPUT_FIELD_TYPE_COLLECTION
+              collection_props:
+                base_field_id: 11a9dc23-9269-4733-9f92-2420ea335e40
+                key: ''
+            57fba39d-687f-4fea-b50f-4b86fa56e45b:
+              id: 57fba39d-687f-4fea-b50f-4b86fa56e45b
+              name: userName
+              label: User Name
+              description: SNMP User
+              required: false
+              type: INPUT_FIELD_TYPE_STRING
+              string_props:
+                default_value: null
+                is_secret: false
+                static_options: null
+                format: null
+                length: null
+                pattern: null
+                dynamic_options:
+                  values:
+                    - '{"fieldId":"8ec6014c-ac57-4e37-962d-d3e5fb493701"}'
+                extra_values_allowed: false
+            fb5db05b-e59f-4dd4-8d48-326fe380384b:
+              id: fb5db05b-e59f-4dd4-8d48-326fe380384b
+              name: value
+              label: Assign SNMP Users Group
+              description: Group of members for Assign SNMP Users
+              required: false
+              type: INPUT_FIELD_TYPE_GROUP
+              group_props:
+                members:
+                  values:
+                    - 57fba39d-687f-4fea-b50f-4b86fa56e45b
+            3f0bcc9f-b6e1-4613-9005-153ae83c2fb5:
+              id: 3f0bcc9f-b6e1-4613-9005-153ae83c2fb5
+              name: snmpUsers
+              label: Assign SNMP Users
+              description: ''
+              required: false
+              type: INPUT_FIELD_TYPE_COLLECTION
+              collection_props:
+                base_field_id: fb5db05b-e59f-4dd4-8d48-326fe380384b
+                key: ''
+            ec4ac7d7-7ee9-4f03-9c0e-03c10cf64439:
+              id: ec4ac7d7-7ee9-4f03-9c0e-03c10cf64439
+              name: deviceList
+              label: DeviceList
+              description: Assign Devices to Users
+              required: false
+              type: INPUT_FIELD_TYPE_RESOLVER
+              resolver_props:
+                base_field_id: 3f0bcc9f-b6e1-4613-9005-153ae83c2fb5
+                display_mode: RESOLVER_FIELD_DISPLAY_MODE_SPARSE
+                input_mode: RESOLVER_FIELD_INPUT_MODE_MULTI_DEVICE_TAG
+                input_tag_label: null
+                tag_filter_query: null
+            root:
+              id: root
+              name: ''
+              label: ''
+              description: ''
+              required: false
+              type: INPUT_FIELD_TYPE_GROUP
+              group_props:
+                members:
+                  values:
+                    - 857cf261-d276-4c30-9d4d-a49284ad0781
+                    - ec4ac7d7-7ee9-4f03-9c0e-03c10cf64439
+        layout:
+          value: '{"c64f6ea1-843c-4af8-8e5d-f0ccb7a77b22":{"key":"c64f6ea1-843c-4af8-8e5d-f0ccb7a77b22","dependency":{"8ec6014c-ac57-4e37-962d-d3e5fb493701":{"value":[],"mode":"SHOW"}},"type":"INPUT"},"ec4ac7d7-7ee9-4f03-9c0e-03c10cf64439":{"key":"ec4ac7d7-7ee9-4f03-9c0e-03c10cf64439","type":"INPUT","showDefaultRow":false,"isPageLayout":false,"order":["3f0bcc9f-b6e1-4613-9005-153ae83c2fb5"]},"705b6e7c-807c-47de-8877-6959c9c8e811":{"key":"705b6e7c-807c-47de-8877-6959c9c8e811","type":"INPUT"},"00988f83-d717-463b-8c85-0093c7bf6fc5":{"key":"00988f83-d717-463b-8c85-0093c7bf6fc5","type":"INPUT","dependency":{"8ec6014c-ac57-4e37-962d-d3e5fb493701":{"value":[],"mode":"SHOW"}}},"cc41a529-094f-4361-84a9-419f4c93d8a5":{"key":"cc41a529-094f-4361-84a9-419f4c93d8a5","type":"INPUT","order":["4efc7611-90db-4eda-90a4-c96c9831a706"]}}'
