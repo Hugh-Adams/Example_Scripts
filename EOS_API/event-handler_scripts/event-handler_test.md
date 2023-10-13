@@ -1,10 +1,10 @@
 **DESCRIPTION**
-    This script is designed to test an Interface event handler and display
+    These scripts are designed to test an Interface event handler and display
     the status of the interfaces included in the event handler configuration.
 
 **INSTALLATION**
-   In order to install this extension:
-      - copy 'INTF_event-handler_test.py' to /mnt/flash on the test switch
+   In order to use these these scripts:
+      - copy either 'INTF_event-handler_test.py' or 'accessPort.py' to /mnt/flash on the test switch
       - enable the Command API interface:
          management api http-commands
             protocol unix-socket
@@ -16,14 +16,14 @@
       (config)# event-handler INTF_Test
                   trigger on-intf Ethernet10 operstatus
                   action bash
-                     python /mnt/flash/INTF_event-handler_test.py
+                     python /mnt/flash/*{{script_name}}*.py
                      EOF
                   delay 2
                exit
       (config)# event-handler INTFs_Test
                   trigger on-intf Ethernet10-15 operstatus
                   action bash
-                     python /mnt/flash/INTF_event-handler_test.py
+                     python /mnt/flash/*{{script_name}}*.py
                      EOF
                   delay 2
                exit
