@@ -104,8 +104,12 @@ def webFetch(args, filePath):
     if 'data' in result.json().keys():
         download_link = (result.json()["data"]["url"])
         if args.test:
+<<<<<<< HEAD
             print(
                 f"\nServer Response: {result}\nResponse Data:{result.json()}")
+=======
+            print("\nServer Response:%s\nResponse Data:%s" %(result, result.json()))
+>>>>>>> 657ad11 (Add event-handler test)
 
         if not args.nofile:
             # Download the file
@@ -117,6 +121,7 @@ def webFetch(args, filePath):
                         fh.write(chunk)
             print(result)
     else:
+<<<<<<< HEAD
         print(f"Unexpected result from URL fetch:\n\tfile path URL - {jsonpost['filePath']} \n\tresponse - {result.json()}")
 
 def corpFetch(args, filePath):
@@ -138,11 +143,44 @@ def corpFetch(args, filePath):
         fetch = requests.get(fileUrl, stream=True)
         if fetch.status_code == 200:
             print(f"File downloading to {filePath}")
+=======
+        print("Unexpected result from URL fetch:\n\tfile path URL - %s \n\tresponse - %s" %
+              (jsonpost['filePath'], result.json()))
+
+def corpFetch(args, filePath):
+    # Create URL for dist file retrival, requires VPN access
+    #download_link_url = "http://dist/release/cvp/"
+    download_link_url = "http://10.242.33.5/release/cvp/"
+    fileParts = args.upgrade.split('-')
+    if args.rc is None:
+        cv_release = fileParts[-2]
+        pre_release = fileParts[-1].split('.')[0]
+    else:
+        cv_release = fileParts[-1].rsplit('.',1)[0]
+        pre_release = args.rc
+    url = download_link_url + str(cv_release) +'/'+ str(pre_release)
+    fileUrl = url +'/'+ str(args.upgrade)
+    if args.nofile:
+        print("Option '--nofile' selected, no Download initiated")
+        response = requests.get(url)
+        if args.upgrade in str(response.content):
+            print("File %s found on page %s" %(args.upgrade, url))
+            print("Download URL %s" %(fileUrl))
+    else:
+        print("File download started")    
+        fetch = requests.get(fileUrl, stream=True)
+        if fetch.status_code == 200:
+            print("File downloading to %s" % (filePath))
+>>>>>>> 657ad11 (Add event-handler test)
             with open(filePath, 'wb') as fh:
                 for chunk in fetch.iter_content(chunk_size=1024):
                     fh.write(chunk)
         else:
+<<<<<<< HEAD
             print(f"Unexpected result from URL fetch: {url}-{fetch.reason}")
+=======
+            print("Unexpected result from URL fetch: %s - %s" %(fileUrl, fetch.reason))
+>>>>>>> 657ad11 (Add event-handler test)
     
 def main (args):
     '''
@@ -158,7 +196,13 @@ def main (args):
         except OSError:
             # directory already exists
             pass
+<<<<<<< HEAD
     if "eft" in str (args.upgrade).lower():
+=======
+    if args.rc:
+        corpFetch(args, saveFile)
+    elif "eft" in str (args.upgrade).lower():
+>>>>>>> 657ad11 (Add event-handler test)
         corpFetch(args, saveFile)
     else:
         webFetch(args, saveFile)
@@ -172,5 +216,9 @@ if __name__ == "__main__":
     parser.add_argument('--proxyAddr', required=False, help="IP address or URL of proxy server", default=None)
     parser.add_argument('--test', required=False, action='store_true')
     parser.add_argument('--nofile', required=False, action='store_true')
+<<<<<<< HEAD
+=======
+    parser.add_argument('--rc', required=False, help="Release Candidate Version e.g. RC2", default=None)
+>>>>>>> 657ad11 (Add event-handler test)
     args = parser.parse_args()
     main(args)

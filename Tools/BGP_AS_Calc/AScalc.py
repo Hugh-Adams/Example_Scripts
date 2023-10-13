@@ -44,7 +44,10 @@ def asnCalc(asn):
         asDot_Top = str(int(float(asn)//65536))
         asDot_Btm = str(int(float(asn)%65536))
         asDot_Btm = asDot_Btm.rjust(5, '0')
-        asdot = asDot_Top+"."+asDot_Btm
+        if asDot_Top == "0":
+            asdot = asDot_Btm
+        else:
+            asdot = asDot_Top+"."+asDot_Btm
         asplain = str(asn)
     return [asdot,asplain]
                       
@@ -62,7 +65,7 @@ def main():
     # Set Intial Variables required
     options = parseArgs()
     ASNreturn = asnCalc(options.ASN)
-    print "BGP AS Number\nAS-DOT - %s\nAS-PLAIN - %s" %(ASNreturn[0],ASNreturn[1])
+    print ("BGP AS Number\nAS-DOT - %s\nAS-PLAIN - %s" %(ASNreturn[0],ASNreturn[1]))
         
 if __name__ == '__main__':
     main()
