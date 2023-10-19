@@ -76,7 +76,7 @@ LIMITATIONS
 """
 
 # Imports
-import os,sys
+import os,time
 import pyeapi
 import ssl
 
@@ -114,7 +114,7 @@ class Device(object):
             # Connect to Switch via Unix Socket
             self.switch = pyeapi.connect(transport='socket')
         else:
-            print("Problem connecting to device: unrecognised protocol")
+            print("#Device - Problem connecting to device: unrecognised protocol")
 
     def runCmds(self, commands):
         """ send commands to switch it return the output of each command in JSON format by default.
@@ -122,7 +122,11 @@ class Device(object):
         """
 
         # capture Connection problem messages:
-        self.response = self.switch.execute(commands)
+        try:
+            self.response = self.switch.execute(commands)
+        except Exception as error:
+            print("#Device - Commands Failed Error - "+str(error))
+            return []
         return self.response['result']
 
 # Main Function
@@ -135,6 +139,7 @@ def main():
         elif env.startswith('INTF'):
             intfStates[intfName] = os.environ['OPERSTATE']
     for interface in intfStates.keys():
+        print("Working on %s"%interface)
 # Reuquired Show commands
         command_IPaddr = "show ip arp interface %s" %interface
         command_MACaddr = "show mac address-table interface %s" %interface
@@ -149,83 +154,106 @@ def main():
         device = Device(protocol=scriptProtocol)
         response = device.runCmds([command_IPaddr,command_MACaddr,command_LLDP,command_intStatus])
         #print(response)
-        if "error" not in response[3].keys():
-            intfDesc = response[3].get("interfaceStatuses").get(interface).get("description")
+        if len(response) > 0:
+            errorFound = []
+            if "error" not in response[3].keys():
+                intfDesc = response[3].get("interfaceStatuses").get(interface).get("description")
+            else:
+                errorFound.append("IntfDesc - %S" %response[3]["error"])
             if "error" not in response[0].keys():
                 arpEntries = response[0].get("ipV4Neighbors")
-                if "error" not in response[1].keys():
-                    macEntries = response[1].get("unicastTable",{}).get("tableEntries")
-                    if "error" not in response[2].keys():
-                        lldpEntries = response[2].get("lldpNeighbors")           
+            else:
+                errorFound.append("ARP Entries - %S" % response[0]["error"])
+            if "error" not in response[1].keys():
+                macEntries = response[1].get("unicastTable",{}).get("tableEntries")
+            else:
+                errorFound.append("MAC Entries - %S" % response[1]["error"])
+            if "error" not in response[2].keys():
+                lldpEntries = response[2].get("lldpNeighbors")
+            else:
+                errorFound.append("LLDP Entries - %S" % response[2]["error"])
+            if len(errorFound) > 0:
+                print ("  Problem with fetching show commands:")
+                for errorText in errorFound:
+                    print("  "+str(errorText))
+                exit(os.EX_PROTOCOL)
         else:
-            print ("Problem with fetching show commands")
+            print("  Problem with sending commands")
             exit(os.EX_PROTOCOL)
+
 # Decide what actions are required
 # set VLAN for moving device to, default deadend VLAN
         vlan = DEvlan
+        matchFound = False
 # Look for MAC addresses
         stop = False
+        print("  Check in %s MAC entries for match"%len(macEntries))
         for macAddr in deviceAttribs["macList"].keys():
             for entry in macEntries:
-                print("  Checking %s" %macAddr)
                 if macAddr in entry.get('macAddress'):
-                    print("  Found MAC Address\n")
+                    print("    Found MAC Address: %s\n"%macAddr)
                     vlan = deviceAttribs["macList"][macAddr]
                     stop = True
                     break
             if stop:
+                matchFound = True
                 break
 # Look for IP addresses
         stop = False
+        print("  Check in %s IP address for match" % len(arpEntries))
         for ipAddr in deviceAttribs["ipList"].keys():
             for entry in arpEntries:
-                print("  Checking %s" % ipAddr)
                 if ipAddr in entry.get('address'):
-                    print("  Found IP Address\n")
+                    print("    Found IP Address %s\n"%ipAddr)
                     vlan = deviceAttribs["ipList"][ipAddr]
                     stop = True
                     break
             if stop:
+                matchFound = True
                 break
 # Look for LLDP Neighbor
         stop = False
+        print("  Check in %s LLDP neighbors for match" % len(lldpEntries))
         for lldpNeighbor in deviceAttribs["lldpList"].keys():
             for entry in lldpEntries:
-                print("  Checking %s" %lldpNeighbor)
                 if lldpNeighbor in entry.get("neighborDevice"):
-                    print("  Found LLDP Neighbor\n")
+                    print("    Found LLDP Neighbor %s\n"%lldpNeighbor)
                     vlan = deviceAttribs["lldpList"][lldpNeighbor]
                     stop = True
                     break
             if stop:
+                matchFound = True
                 break
 # Configure the switch
+        if matchFound:
 # Required Configuration Commands
-        confChanged = False
+            confChanged = False
 # Assign port to required VLAN from deviceAttribs if not configured before and link state is up
-        if "port_active" not in intfDesc and "linkup" in intfStates[interface]:
-            response = device.runCmds(["enable", "configure", "interface %s" % interface,
-                                    "switchport access vlan %s" %vlan, "description port_active", "exit"])
-            confChanged = True
+            if "port_active" not in intfDesc and "linkup" in intfStates[interface]:
+                response = device.runCmds(["enable", "configure", "interface %s" % interface,
+                                        "switchport access vlan %s" %vlan, "description port_active", "exit"])
+                confChanged = True
 # Assign port to VLAN 999 if not configured before and link state is up
-        if "port_active" in intfDesc and "linkdown" in intfStates[interface]:
-            vlan = DEvlan
-            confChanged = True
-            response = device.runCmds(["enable", "configure", "interface %s" %
-                                    interface, "switchport access vlan %s"%vlan, "description port_inactive", "exit"])
-
+            if "port_active" in intfDesc and "linkdown" in intfStates[interface]:
+                vlan = DEvlan
+                confChanged = True
+                response = device.runCmds(["enable", "configure", "interface %s" %
+                                        interface, "switchport access vlan %s"%vlan, "description port_inactive", "exit"])
 # Check Configuration
-        if confChanged:
-            configOK = True
-            for item in response:
-                if "error" in item.keys():
-                    configOK = False
-                    print("Interface %s - Configuration Error:%s"%(interface,item["error"]))
-            if configOK:
-                print("  Interface %s - Configured successfully with %s"%(interface,vlan))
+            if confChanged:
+                configOK = True
+                for item in response:
+                    if "error" in item.keys():
+                        configOK = False
+                        print("  Interface %s - Configuration Error:%s"%(interface,item["error"]))
+                if configOK:
+                    print("  Interface %s - Configured successfully with %s"%(interface,vlan))
+            else:
+                print("  Interface %s - No change in config"%interface)
         else:
-            print("  Interface %s - No change in config"%interface)
-
+            print("  Interface %s No Matches found, no configuration changed" % interface)
 
 if __name__ == "__main__":
+    # Wait for device tables to stabilse
+    #time.sleep(3)
     main()
