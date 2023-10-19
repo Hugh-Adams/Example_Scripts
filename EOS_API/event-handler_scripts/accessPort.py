@@ -226,32 +226,34 @@ def main():
                 break
 # Configure the switch
         if matchFound:
-# Required Configuration Commands
-            confChanged = False
-# Assign port to required VLAN from deviceAttribs if not configured before and link state is up
-            if "port_active" not in intfDesc and "linkup" in intfStates[interface]:
-                response = device.runCmds(["enable", "configure", "interface %s" % interface,
-                                        "switchport access vlan %s" %vlan, "description port_active", "exit"])
-                confChanged = True
-# Assign port to VLAN 999 if not configured before and link state is up
-            if "port_active" in intfDesc and "linkdown" in intfStates[interface]:
-                vlan = DEvlan
-                confChanged = True
-                response = device.runCmds(["enable", "configure", "interface %s" %
-                                        interface, "switchport access vlan %s"%vlan, "description port_inactive", "exit"])
-# Check Configuration
-            if confChanged:
-                configOK = True
-                for item in response:
-                    if "error" in item.keys():
-                        configOK = False
-                        print("  Interface %s - Configuration Error:%s"%(interface,item["error"]))
-                if configOK:
-                    print("  Interface %s - Configured successfully with %s"%(interface,vlan))
-            else:
-                print("  Interface %s - No change in config"%interface)
+            print("  Interface %s Matches found, configuration will be changed" %interface)
         else:
-            print("  Interface %s No Matches found, no configuration changed" % interface)
+            print("  NO matches found Interface %s, configuration will only be changed if link status is 'down'"%interface)
+            print("  If link status is up vlan will be set to default VLAN%s"%vlan)
+# Required Configuration Commands
+        confChanged = False
+# Assign port to required VLAN from deviceAttribs if not configured before and link state is up
+        if "port_active" not in intfDesc and "linkup" in intfStates[interface]:
+            response = device.runCmds(["enable", "configure", "interface %s" % interface,
+                                    "switchport access vlan %s" %vlan, "description port_active", "exit"])
+            confChanged = True
+# Assign port to VLAN 999 if not configured before and link state is up
+        if "port_active" in intfDesc and "linkdown" in intfStates[interface]:
+            vlan = DEvlan
+            response = device.runCmds(["enable", "configure", "interface %s" %
+                                    interface, "switchport access vlan %s"%vlan, "description port_inactive", "exit"])
+            confChanged = True
+# Check Configuration
+        if confChanged:
+            configOK = True
+            for item in response:
+                if "error" in item.keys():
+                    configOK = False
+                    print("  Interface %s - Configuration Error:%s"%(interface,item["error"]))
+            if configOK:
+                print("  Interface %s - Configured successfully with %s"%(interface,vlan))
+        else:
+            print("  Interface %s - No change in config"%interface)
 
 if __name__ == "__main__":
     # Wait for device tables to stabilse
