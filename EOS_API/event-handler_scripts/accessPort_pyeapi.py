@@ -54,9 +54,9 @@ INSTALLATION
         (config)# event-handler accessPort
                     trigger on-intf Ethernet10 operstatus
                     action bash
-                        python /mnt/flash/accessPort.py
+                        python3 /mnt/flash/accessPort.py
                         EOF
-                    delay 2
+                    delay 10
                   exit
 
     2 - Configure an event-handler on the switch for multiple interfaces:
@@ -65,7 +65,7 @@ INSTALLATION
                     action bash
                         python /mnt/flash/accessPort.py
                         EOF
-                    delay 2
+                    delay 10
                   exit
 
 COMPATIBILITY
@@ -76,7 +76,7 @@ LIMITATIONS
 """
 
 # Imports
-import os,time
+import os
 import pyeapi
 import ssl
 
@@ -256,6 +256,4 @@ def main():
             print("  Interface %s - No change in config"%interface)
 
 if __name__ == "__main__":
-    # Wait for device tables to stabilse
-    #time.sleep(3)
     main()
