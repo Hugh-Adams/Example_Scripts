@@ -79,6 +79,7 @@ LIMITATIONS
 
 # Imports
 from jsonrpclib import Server
+import os
 
 # Default Argument Values for user settings
 scriptProtocol = 'local'
