@@ -53,7 +53,7 @@ import os
 
 def webFetch(args, filePath):
     # Create the Various Paths for the files
-    filePath = '/support/download/CloudVision/CloudVision Portal/Active Releases/'
+    fileURLpath = '/support/download/CloudVision/CloudVision Portal/Active Releases/'
     fileParts = str(args.upgrade.split('-')[-1]).split('.')
     # Create Folder Path
     # Major Release
@@ -66,8 +66,8 @@ def webFetch(args, filePath):
     upgradeFile = upgradeFile+args.upgrade
     altUpgradeFile = altUpgradeFile+args.upgrade
     # Create Download URL
-    url = filePath+upgradeFile
-    alturl = filePath+altUpgradeFile
+    url = fileURLpath+upgradeFile
+    alturl = fileURLpath+altUpgradeFile
     # Access the Arista Website
     # Step 1 - get a session code
     warnings.filterwarnings("ignore")
@@ -120,8 +120,8 @@ def webFetch(args, filePath):
 
 def corpFetch(args, filePath):
     # Create URL for dist file retrival, requires VPN access
-    #download_link_url = "http://dist/release/cvp/"
-    download_link_url = "http://10.242.33.5/release/cvp/"
+    download_link_url = "http://dist/release/cvp/" # This URL works for devices on a corp VPN or IP address with Corp DNS
+    #download_link_url = "http://10.242.33.5/release/cvp/" # This should be the IP address for the dist Server
     fileParts = args.upgrade.split('-')
     if args.rc is None:
         cv_release = fileParts[-2]
@@ -131,6 +131,8 @@ def corpFetch(args, filePath):
         pre_release = args.rc
     url = download_link_url + str(cv_release) +'/'+ str(pre_release)
     fileUrl = url +'/'+ str(args.upgrade)
+    if args.test:
+        print(f"File URL: {fileUrl}")
     if args.nofile:
         print("Option '--nofile' selected, no Download initiated")
         response = requests.get(url)
