@@ -34,10 +34,14 @@ import argparse
 
 def asnCalc(asn):
     """ calculate both types of ASN plain and dotted fron ASN value
-        if the ASN has a dot in it assume as-asdot otherwise as-asplain
+        if the ASN has a dot or coluon in it assume as-asdot otherwise as-asplain
         return both types asn-asdot followed by asn-asplain"""
     if "." in str(asn):
         asnSplit= re.split('\.',str(asn))
+        asdot=str(asn)
+        asplain = str((int(asnSplit[0])*65536)+int(asnSplit[1]))
+    elif ":" in str(asn):
+        asnSplit= re.split('\:',str(asn))
         asdot=str(asn)
         asplain = str((int(asnSplit[0])*65536)+int(asnSplit[1]))
     else:
