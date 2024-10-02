@@ -1,3 +1,10 @@
+# /// script
+# requires-python = ">=3.12"
+# dependencies = ["requests","cloudvision","fuzzywuzzy","python-Levenshtein","xlrd"]
+# [tool.uv]
+# exclude-newer = "2024-10-01T00:00:00Z"
+# ///
+
 #!/usr/bin/env python3
 #
 # Copyright (c) 2021, Arista Networks, Inc.
